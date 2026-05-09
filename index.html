@@ -927,6 +927,10 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
     return !Object.keys(e).length;
   };
   const upd = (key, val) => { onChange({ ...data, [key]: val }); if (errors[key]) setErrors({ ...errors, [key]: undefined }); };
+  const blurEmail = () => {
+    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
+      setErrors(e => ({ ...e, email: 'Érvényes email cím szükséges' }));
+  };
   const valid = data.name && data.email && data.phone && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email) && data.phone.replace(/\D/g, '').length >= 9;
 
   return (
@@ -950,7 +954,7 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
             <label htmlFor="f-email">Email cím <span className="req">*</span></label>
             <div className="uk-field-icon-wrap">
               <span className="icon"><Icon.mail /></span>
-              <input id="f-email" className={'uk-input' + (errors.email ? ' has-error' : '')} type="email" value={data.email} onChange={e => upd('email', e.target.value)} placeholder="pl. nagy.anna@gmail.com" autoComplete="email" />
+              <input id="f-email" className={'uk-input' + (errors.email ? ' has-error' : '')} type="email" value={data.email} onChange={e => upd('email', e.target.value)} onBlur={blurEmail} placeholder="pl. nagy.anna@gmail.com" autoComplete="email" />
             </div>
             {errors.email ? <div className="uk-field-error">{errors.email}</div> : <div className="uk-field-help">Erre az email-címre küldjük az ellenőrző kódot.</div>}
           </div>
