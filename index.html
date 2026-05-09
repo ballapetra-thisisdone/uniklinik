@@ -103,7 +103,9 @@
     .uk-topbar-back:disabled { color: var(--uk-line); cursor: not-allowed; }
     .uk-topbar-title { flex: 1; font-weight: 600; font-size: 14px; color: var(--uk-ink); letter-spacing: -.005em; }
     .uk-topbar-help { font-size: 13px; color: var(--uk-primary); font-weight: 500; cursor: pointer; background: none; border: 0; padding: 6px 8px; }
-    .uk-topbar-logo { font-weight: 800; font-size: 16px; letter-spacing: -.02em; color: var(--uk-ink); }
+    .uk-topbar-home { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-md); color: var(--uk-muted); text-decoration: none; transition: background 120ms var(--ease), color 120ms var(--ease); }
+    .uk-topbar-home:hover { background: var(--uk-line-2); color: var(--uk-ink); }
+    .uk-topbar-logo { font-weight: 800; font-size: 16px; letter-spacing: -.02em; color: var(--uk-ink); text-decoration: none; }
     .uk-topbar-logo .dot { color: var(--uk-primary); }
 
     /* ── Top bar — desktop ── */
@@ -657,9 +659,9 @@ function ProgressIndicator({ step, onStepClick }) {
 function TopBar({ title, onBack, canBack, isDesktop }) {
   if (isDesktop) return (
     <div className="uk-topbar-desktop">
-      <div className="uk-topbar-logo">uniklinik<span className="dot">.</span></div>
+      <a href="/" className="uk-topbar-logo">uniklinik<span className="dot">.</span></a>
       <nav>
-        <a>Fogászat</a><a>Esztétikai</a><a>Implantológia</a><a>Esettanulmányok</a><a>Csapatunk</a>
+        <a href="/">Fogászat</a><a href="/">Esztétikai</a><a href="/">Implantológia</a><a href="/">Esettanulmányok</a><a href="/">Csapatunk</a>
         <a className="active">Időpontfoglalás</a>
       </nav>
       <div className="right">
@@ -672,7 +674,7 @@ function TopBar({ title, onBack, canBack, isDesktop }) {
     <div className="uk-topbar">
       <button className="uk-topbar-back" onClick={onBack} disabled={!canBack} aria-label="Vissza"><Icon.back /></button>
       <div className="uk-topbar-title">{title}</div>
-      <button className="uk-topbar-help">Súgó</button>
+      <a href="/" className="uk-topbar-home" aria-label="Vissza a honlapra"><Icon.close /></a>
     </div>
   );
 }
