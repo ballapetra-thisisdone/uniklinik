@@ -1326,7 +1326,13 @@ function BookingApp() {
 
   const renderScreen = () => {
     switch (screen) {
-      case 'data': return <DataScreen data={state.data} onChange={data => update({ data })} onContinue={() => goTo('choice')} autoSaving={autoSaving} />;
+      case 'data': return <DataScreen data={state.data} onChange={data => update({ data })} onContinue={() => {
+          if (state.slot?.time) goTo('confirm');
+          else if (state.doctor && state.treatment) goTo('calendar');
+          else if (state.doctor) goTo('treatmentAfterDoctor');
+          else if (state.treatment) goTo('doctorAfterTreatment');
+          else goTo('choice');
+        }} autoSaving={autoSaving} />;
       case 'choice': return <ChoiceScreen onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
       case 'doctor': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} />;
       case 'treatment': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first' })} onContinue={() => goTo('doctorAfterTreatment')} />;
