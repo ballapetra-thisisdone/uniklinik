@@ -935,7 +935,7 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
         <AutoSaveTag visible={autoSaving} />
         <div className="uk-stack uk-stack-3">
           <h1 className="uk-h1">Add meg az adataid</h1>
-          <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ezekre a foglalás visszaigazolásához és az SMS kód kiküldéséhez van szükségünk.</p>
+          <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ezekre a foglalás visszaigazolásához és az email kód kiküldéséhez van szükségünk.</p>
         </div>
         <div className="uk-stack uk-stack-4">
           <div className="uk-field">
@@ -952,7 +952,7 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
               <span className="icon"><Icon.mail /></span>
               <input id="f-email" className={'uk-input' + (errors.email ? ' has-error' : '')} type="email" value={data.email} onChange={e => upd('email', e.target.value)} placeholder="pl. nagy.anna@gmail.com" autoComplete="email" />
             </div>
-            {errors.email && <div className="uk-field-error">{errors.email}</div>}
+            {errors.email ? <div className="uk-field-error">{errors.email}</div> : <div className="uk-field-help">Erre az email-címre küldjük az ellenőrző kódot.</div>}
           </div>
           <div className="uk-field">
             <label htmlFor="f-phone">Telefonszám <span className="req">*</span></label>
@@ -960,7 +960,7 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
               <span className="icon"><Icon.phone /></span>
               <input id="f-phone" className={'uk-input' + (errors.phone ? ' has-error' : '')} type="tel" value={data.phone} onChange={e => upd('phone', e.target.value)} placeholder="+36 30 123 4567" autoComplete="tel" />
             </div>
-            {errors.phone ? <div className="uk-field-error">{errors.phone}</div> : <div className="uk-field-help">Erre a számra küldjük az SMS kódot.</div>}
+            {errors.phone && <div className="uk-field-error">{errors.phone}</div>}
           </div>
         </div>
         <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az adataid biztonságban kezeljük. A folyamat bármikor megszakítható — adataid mentődnek.</div></div>
@@ -1131,7 +1131,7 @@ function ConfirmScreen({ booking, onEdit, onSendSms }) {
       <div className="uk-content">
         <div className="uk-stack uk-stack-2">
           <h1 className="uk-h1">Ellenőrizd a foglalást</h1>
-          <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ha minden adat helyes, küldjük az SMS kódot a véglegesítéshez.</p>
+          <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ha minden adat helyes, emailben küldjük a kódot a véglegesítéshez.</p>
         </div>
         <div className="uk-confirm-layout">
           <div className="uk-summary">
@@ -1151,21 +1151,21 @@ function ConfirmScreen({ booking, onEdit, onSendSms }) {
           <div className="uk-stack uk-stack-4">
             <div className="uk-card">
               <div className="uk-row-flex" style={{ gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 'var(--r-md)', background: 'var(--uk-primary-tint)', color: 'var(--uk-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon.phone /></div>
-                <div style={{ flex: 1 }}><div className="uk-h3">SMS megerősítés</div><div className="uk-small" style={{ marginTop: 2 }}>A következő lépésben kódot küldünk erre a számra: <strong style={{ color: 'var(--uk-ink)' }}>{data.phone}</strong>.</div></div>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--r-md)', background: 'var(--uk-primary-tint)', color: 'var(--uk-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon.mail /></div>
+                <div style={{ flex: 1 }}><div className="uk-h3">Email megerősítés</div><div className="uk-small" style={{ marginTop: 2 }}>A következő lépésben kódot küldünk erre az email-címre: <strong style={{ color: 'var(--uk-ink)' }}>{data.email}</strong>.</div></div>
               </div>
             </div>
-            <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az időpontot 5 percre fenntartjuk, amíg megérkezik az SMS és beilleszted a kódot.</div></div>
+            <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az időpontot 5 percre fenntartjuk, amíg megérkezik az email és beilleszted a kódot.</div></div>
           </div>
         </div>
       </div>
-      <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-block" onClick={onSendSms}>SMS kód kérése <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
+      <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-block" onClick={onSendSms}>Email kód kérése <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
     </>
   );
 }
 
 // Screen 6: SMS
-function SMSScreen({ phone, onConfirm, onResend, onBack }) {
+function SMSScreen({ email, onConfirm, onResend, onBack }) {
   const [code, setCode] = useState('');
   const [seconds, setSeconds] = useState(300);
   const [resendCountdown, setResendCountdown] = useState(60);
@@ -1200,8 +1200,8 @@ function SMSScreen({ phone, onConfirm, onResend, onBack }) {
       <div className="uk-stack uk-stack-3">
         <h1 className="uk-h1">Add meg a kódot</h1>
         <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>
-          6 jegyű kódot küldtünk SMS-ben erre a számra:<br/>
-          <strong style={{ color: 'var(--uk-ink)' }}>{phone}</strong>
+          6 jegyű kódot küldtünk erre az email-címre:<br/>
+          <strong style={{ color: 'var(--uk-ink)' }}>{email}</strong>
           <button onClick={onBack} className="uk-link" style={{ background: 'none', border: 0, marginLeft: 8, padding: 0, fontSize: 'inherit' }}>módosítás</button>
         </p>
       </div>
@@ -1260,7 +1260,7 @@ function SuccessScreen({ booking, onNew }) {
 // ════════════════════════════════════ APP ════════════════════════════════════
 
 const PROGRESS_STEP_OF = { data:0, choice:1, doctor:1, treatment:1, doctorAfterTreatment:1, treatmentAfterDoctor:1, calendar:2, confirm:3, sms:3, success:3 };
-const SCREEN_TITLES = { data:'Adatok megadása', choice:'Folytatás', doctor:'Orvos választás', treatment:'Kezelés választás', doctorAfterTreatment:'Orvos választás', treatmentAfterDoctor:'Kezelés választás', calendar:'Időpont választás', confirm:'Megerősítés', sms:'SMS hitelesítés', success:'Kész' };
+const SCREEN_TITLES = { data:'Adatok megadása', choice:'Folytatás', doctor:'Orvos választás', treatment:'Kezelés választás', doctorAfterTreatment:'Orvos választás', treatmentAfterDoctor:'Kezelés választás', calendar:'Időpont választás', confirm:'Megerősítés', sms:'Email hitelesítés', success:'Kész' };
 const STORAGE_KEY = 'uniklinik-booking-v3';
 
 function loadInitial() {
@@ -1330,7 +1330,7 @@ function BookingApp() {
       case 'treatmentAfterDoctor': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => goTo('calendar')} doctor={state.doctor} />;
       case 'calendar': return <CalendarScreen doctor={state.doctor} treatment={state.treatment} value={state.slot} onSelect={slot => update({ slot })} onContinue={() => goTo('confirm')} />;
       case 'confirm': return <ConfirmScreen booking={state} onEdit={handleEdit} onSendSms={() => goTo('sms')} />;
-      case 'sms': return <SMSScreen phone={state.data.phone} onConfirm={() => goTo('success')} onResend={() => {}} onBack={() => goTo('data')} />;
+      case 'sms': return <SMSScreen email={state.data.email} onConfirm={() => goTo('success')} onResend={() => {}} onBack={() => goTo('data')} />;
       case 'success': return <SuccessScreen booking={state} onNew={reset} />;
       default: return null;
     }
