@@ -1,0 +1,5 @@
+# Local Claude Code config
+.claude/
+
+# Design handoff bundle (source material)
+design_extract/

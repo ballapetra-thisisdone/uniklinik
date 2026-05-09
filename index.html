@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Uniklinik · Időpontfoglaló</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" />
+  <style>
+    :root {
+      --uk-primary:        #6B1B7A;
+      --uk-primary-hover:  #581462;
+      --uk-primary-press:  #43094B;
+      --uk-primary-tint:   #F4E9F7;
+      --uk-primary-tint-2: #E8D3EE;
+      --uk-accent:         #C046D6;
+      --uk-ink:    #1A1226;
+      --uk-ink-2:  #4A3F55;
+      --uk-muted:  #7E7387;
+      --uk-line:   #E8E2EC;
+      --uk-line-2: #F0EBF3;
+      --uk-paper:  #FAF8FC;
+      --uk-white:  #FFFFFF;
+      --uk-success: #1F7A4D;
+      --uk-success-tint: #E8F5EE;
+      --uk-warn:    #B26A00;
+      --uk-danger:  #B23B2A;
+      --uk-danger-tint: #FBEBE8;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --r-sm: 6px;
+      --r-md: 10px;
+      --r-lg: 14px;
+      --r-xl: 20px;
+      --r-pill: 999px;
+      --sh-1: 0 1px 2px rgba(26,18,38,.05), 0 1px 1px rgba(26,18,38,.04);
+      --sh-2: 0 4px 14px rgba(26,18,38,.06), 0 2px 4px rgba(26,18,38,.04);
+      --sh-3: 0 12px 32px rgba(26,18,38,.10), 0 4px 8px rgba(26,18,38,.05);
+      --sh-focus: 0 0 0 3px rgba(107,27,122,.18);
+      --ease: cubic-bezier(.22,.61,.36,1);
+      --ease-snap: cubic-bezier(.65,0,.35,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      height: 100%;
+      background: var(--uk-paper);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+    #root { height: 100%; display: flex; flex-direction: column; }
+
+    /* ── App shell ── */
+    .uk-app {
+      font-family: var(--font-body);
+      color: var(--uk-ink);
+      background: var(--uk-paper);
+      font-size: 15px;
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+    .uk-app, .uk-app * { box-sizing: border-box; }
+    .uk-app h1,.uk-app h2,.uk-app h3,.uk-app h4,.uk-app p { margin:0; font-weight:inherit; text-wrap:pretty; }
+
+    /* ── Typography ── */
+    .uk-h1 { font-size: 26px; font-weight: 700; line-height: 1.15; letter-spacing: -.02em; color: var(--uk-ink); }
+    .uk-h2 { font-size: 20px; font-weight: 700; line-height: 1.2; letter-spacing: -.015em; color: var(--uk-ink); }
+    .uk-h3 { font-size: 17px; font-weight: 600; line-height: 1.3; color: var(--uk-ink); }
+    .uk-body { font-size: 15px; line-height: 1.55; color: var(--uk-ink); }
+    .uk-small { font-size: 13px; line-height: 1.5; color: var(--uk-ink-2); }
+    .uk-caption { font-size: 12px; line-height: 1.4; color: var(--uk-muted); letter-spacing: .01em; }
+
+    @media (min-width: 768px) {
+      .uk-h1 { font-size: 36px; }
+      .uk-h2 { font-size: 26px; }
+    }
+
+    /* ── Shell layout ── */
+    .uk-shell { display: flex; flex-direction: column; flex: 1; background: var(--uk-paper); }
+
+    /* ── Top bar — mobile ── */
+    .uk-topbar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px 12px;
+      background: var(--uk-white);
+      border-bottom: 1px solid var(--uk-line);
+      flex-shrink: 0;
+      position: sticky; top: 0; z-index: 20;
+    }
+    .uk-topbar-back {
+      width: 36px; height: 36px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: var(--r-md); background: transparent; border: 0;
+      color: var(--uk-ink); cursor: pointer;
+      transition: background 120ms var(--ease);
+    }
+    .uk-topbar-back:hover { background: var(--uk-line-2); }
+    .uk-topbar-back:disabled { color: var(--uk-line); cursor: not-allowed; }
+    .uk-topbar-title { flex: 1; font-weight: 600; font-size: 14px; color: var(--uk-ink); letter-spacing: -.005em; }
+    .uk-topbar-help { font-size: 13px; color: var(--uk-primary); font-weight: 500; cursor: pointer; background: none; border: 0; padding: 6px 8px; }
+    .uk-topbar-logo { font-weight: 800; font-size: 16px; letter-spacing: -.02em; color: var(--uk-ink); }
+    .uk-topbar-logo .dot { color: var(--uk-primary); }
+
+    /* ── Top bar — desktop ── */
+    .uk-topbar-desktop {
+      display: flex; align-items: center;
+      padding: 18px 48px;
+      background: var(--uk-white);
+      border-bottom: 1px solid var(--uk-line);
+      position: sticky; top: 0; z-index: 20;
+    }
+    .uk-topbar-desktop .uk-topbar-logo { font-size: 22px; }
+    .uk-topbar-desktop nav { display: flex; gap: 24px; margin-left: 48px; font-size: 14px; color: var(--uk-ink-2); }
+    .uk-topbar-desktop nav a { color: var(--uk-ink-2); text-decoration: none; font-weight: 500; cursor: pointer; }
+    .uk-topbar-desktop nav a.active { color: var(--uk-primary); }
+    .uk-topbar-desktop .right { margin-left: auto; display: flex; gap: 12px; align-items: center; font-size: 13px; color: var(--uk-muted); }
+    .uk-topbar-desktop .right .phone { font-weight: 600; color: var(--uk-ink); }
+
+    /* ── Body scroll ── */
+    .uk-body-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+    /* ── Content padding ── */
+    .uk-content { padding: 20px 18px 24px; display: flex; flex-direction: column; gap: 18px; flex: 1; }
+    @media (min-width: 768px) {
+      .uk-content { padding: 32px 48px 48px; max-width: 1200px; margin: 0 auto; width: 100%; }
+    }
+    .uk-section-head { display: flex; flex-direction: column; gap: 6px; }
+    .uk-section-head .uk-eyebrow { font-size: 12px; color: var(--uk-primary); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+
+    /* ── Action bar ── */
+    .uk-actionbar {
+      position: sticky; bottom: 0;
+      background: var(--uk-white);
+      border-top: 1px solid var(--uk-line);
+      padding: 14px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+      display: flex; gap: 10px; flex-shrink: 0; z-index: 5;
+    }
+    @media (min-width: 768px) {
+      .uk-actionbar { padding: 18px 48px; }
+    }
+    .uk-actionbar .summary { flex: 1; display: flex; flex-direction: column; justify-content: center; font-size: 13px; color: var(--uk-muted); min-width: 0; }
+    .uk-actionbar .summary strong { color: var(--uk-ink); font-weight: 600; font-size: 14px; }
+
+    /* ── Buttons ── */
+    .uk-btn {
+      appearance: none; border: 0; font-family: inherit; font-weight: 600; font-size: 15px;
+      line-height: 1; padding: 14px 20px; border-radius: var(--r-md); cursor: pointer;
+      transition: background 120ms var(--ease), transform 80ms var(--ease-snap), box-shadow 120ms var(--ease);
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      letter-spacing: -.005em; white-space: nowrap;
+    }
+    .uk-btn:focus-visible { outline: none; box-shadow: var(--sh-focus); }
+    .uk-btn:active { transform: translateY(1px); }
+    .uk-btn-primary { background: var(--uk-primary); color: var(--uk-white); min-height: 48px; }
+    .uk-btn-primary:hover { background: var(--uk-primary-hover); }
+    .uk-btn-primary:disabled { background: var(--uk-line); color: var(--uk-muted); cursor: not-allowed; transform: none; }
+    .uk-btn-secondary { background: var(--uk-primary-tint); color: var(--uk-primary); min-height: 48px; }
+    .uk-btn-secondary:hover { background: var(--uk-primary-tint-2); }
+    .uk-btn-ghost { background: transparent; color: var(--uk-ink); min-height: 48px; border: 1px solid var(--uk-line); }
+    .uk-btn-ghost:hover { background: var(--uk-line-2); }
+    .uk-btn-block { width: 100%; }
+    .uk-btn-lg { min-height: 56px; font-size: 16px; padding: 16px 24px; }
+
+    /* ── Form fields ── */
+    .uk-field { display: flex; flex-direction: column; gap: 6px; }
+    .uk-field label { font-size: 13px; font-weight: 500; color: var(--uk-ink-2); letter-spacing: -.005em; }
+    .uk-field .req { color: var(--uk-primary); margin-left: 2px; }
+    .uk-input, .uk-select {
+      appearance: none; -webkit-appearance: none; font-family: inherit; font-size: 16px;
+      line-height: 1.4; color: var(--uk-ink); background: var(--uk-white);
+      border: 1.5px solid var(--uk-line); border-radius: var(--r-md); padding: 14px; width: 100%;
+      transition: border-color 120ms var(--ease), box-shadow 120ms var(--ease);
+    }
+    .uk-input:hover,.uk-select:hover { border-color: var(--uk-primary-tint-2); }
+    .uk-input:focus,.uk-select:focus { outline: none; border-color: var(--uk-primary); box-shadow: var(--sh-focus); }
+    .uk-input::placeholder { color: var(--uk-muted); }
+    .uk-input.has-error,.uk-select.has-error { border-color: var(--uk-danger); }
+    .uk-field-error { font-size: 12px; color: var(--uk-danger); margin-top: -2px; }
+    .uk-field-help { font-size: 12px; color: var(--uk-muted); }
+    .uk-field-icon-wrap { position: relative; }
+    .uk-field-icon-wrap .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--uk-muted); pointer-events: none; }
+    .uk-field-icon-wrap input { padding-left: 44px; }
+
+    /* ── Search ── */
+    .uk-search { position: relative; }
+    .uk-search input {
+      width: 100%; height: 48px; font-size: 15px; font-family: inherit;
+      background: var(--uk-white); border: 1.5px solid var(--uk-line);
+      border-radius: var(--r-md); padding: 0 44px 0 44px; color: var(--uk-ink);
+      transition: border-color 120ms var(--ease), box-shadow 120ms var(--ease);
+    }
+    .uk-search input:focus { outline: none; border-color: var(--uk-primary); box-shadow: var(--sh-focus); }
+    .uk-search input::placeholder { color: var(--uk-muted); }
+    .uk-search .uk-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--uk-muted); pointer-events: none; }
+    .uk-search .uk-search-clear {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      width: 32px; height: 32px; border-radius: var(--r-pill); border: 0;
+      background: var(--uk-line-2); color: var(--uk-ink-2); cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .uk-search .uk-search-clear:hover { background: var(--uk-line); }
+
+    /* ── Cards ── */
+    .uk-card { background: var(--uk-white); border: 1px solid var(--uk-line); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .uk-card-tight { padding: 14px; }
+
+    /* ── Selectable row ── */
+    .uk-row {
+      background: var(--uk-white); border: 1.5px solid var(--uk-line); border-radius: var(--r-lg);
+      padding: 14px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+      transition: border-color 120ms var(--ease), background 120ms var(--ease), transform 80ms var(--ease-snap);
+      text-align: left; width: 100%; font-family: inherit; color: var(--uk-ink);
+    }
+    .uk-row:hover { border-color: var(--uk-primary-tint-2); background: var(--uk-paper); }
+    .uk-row:active { transform: scale(.99); }
+    .uk-row.selected { border-color: var(--uk-primary); background: var(--uk-primary-tint); }
+    .uk-row .uk-row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .uk-row .uk-row-title { font-weight: 600; font-size: 15px; color: var(--uk-ink); letter-spacing: -.005em; }
+    .uk-row .uk-row-sub { font-size: 13px; color: var(--uk-muted); }
+    .uk-row .uk-row-trail { color: var(--uk-muted); font-size: 13px; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
+    .uk-row .uk-avatar { width: 44px; height: 44px; border-radius: var(--r-pill); background: var(--uk-primary-tint); color: var(--uk-primary); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; letter-spacing: -.01em; }
+    .uk-row .uk-avatar.lg { width: 56px; height: 56px; font-size: 17px; }
+
+    /* ── Tags ── */
+    .uk-tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--r-pill); background: var(--uk-primary-tint); color: var(--uk-primary); font-size: 12px; font-weight: 600; letter-spacing: -.005em; }
+    .uk-tag.muted { background: var(--uk-line-2); color: var(--uk-ink-2); }
+    .uk-tag.success { background: var(--uk-success-tint); color: var(--uk-success); }
+
+    /* ── Progress: bar ── */
+    .uk-progress-bar { display: flex; flex-direction: column; gap: 8px; padding: 14px 18px 16px; background: var(--uk-white); border-bottom: 1px solid var(--uk-line); }
+    @media (min-width: 768px) { .uk-progress-bar { padding: 24px 48px; } }
+    .uk-progress-track { height: 4px; background: var(--uk-line); border-radius: var(--r-pill); overflow: hidden; position: relative; }
+    .uk-progress-fill { position: absolute; inset: 0 auto 0 0; background: var(--uk-primary); border-radius: var(--r-pill); transition: width 360ms var(--ease); }
+    .uk-progress-labels { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 500; }
+    .uk-progress-labels button {
+      flex: 1; appearance: none; font-family: inherit; font-size: 12px; font-weight: 500;
+      letter-spacing: -.005em; line-height: 1.3;
+      background: transparent; border: 1px solid transparent; color: var(--uk-muted);
+      padding: 6px 10px; border-radius: var(--r-pill);
+      cursor: default;
+      transition: color 200ms var(--ease), background 200ms var(--ease), border-color 200ms var(--ease);
+    }
+    .uk-progress-labels button.active {
+      color: var(--uk-primary); font-weight: 600;
+      background: var(--uk-primary-tint);
+      border-color: var(--uk-primary-tint-2);
+    }
+    .uk-progress-labels button.done {
+      color: var(--uk-ink-2); cursor: pointer;
+      background: var(--uk-line-2);
+      border-color: var(--uk-line);
+    }
+    .uk-progress-labels button.done:hover {
+      color: var(--uk-primary); background: var(--uk-primary-tint); border-color: var(--uk-primary);
+    }
+    .uk-progress-labels button.done:focus-visible { outline: none; box-shadow: var(--sh-focus); }
+
+    /* ── Progress: dots ── */
+    .uk-progress-dots { display: flex; align-items: flex-start; padding: 18px 18px 14px; background: var(--uk-white); border-bottom: 1px solid var(--uk-line); gap: 0; }
+    @media (min-width: 768px) { .uk-progress-dots { padding: 22px 48px 18px; } }
+    .uk-progress-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; min-width: 0; }
+    .uk-progress-step + .uk-progress-step::before { content: ''; position: absolute; left: -50%; right: 50%; top: 12px; height: 2px; background: var(--uk-line); }
+    .uk-progress-step.done::before,.uk-progress-step.active::before { background: var(--uk-primary); }
+    .uk-progress-dot { width: 26px; height: 26px; border-radius: var(--r-pill); background: var(--uk-white); border: 2px solid var(--uk-line); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--uk-muted); position: relative; z-index: 1; transition: all 200ms var(--ease); }
+    .uk-progress-step.active .uk-progress-dot { background: var(--uk-primary); border-color: var(--uk-primary); color: var(--uk-white); box-shadow: 0 0 0 4px var(--uk-primary-tint); }
+    .uk-progress-step.done .uk-progress-dot { background: var(--uk-primary); border-color: var(--uk-primary); color: var(--uk-white); }
+    .uk-progress-step .uk-progress-step-label { font-size: 11px; color: var(--uk-muted); font-weight: 500; text-align: center; letter-spacing: -.005em; line-height: 1.2; }
+    .uk-progress-step.active .uk-progress-step-label { color: var(--uk-primary); font-weight: 600; }
+    .uk-progress-step.done .uk-progress-step-label { color: var(--uk-ink-2); }
+
+    /* ── Progress: minimal ── */
+    .uk-progress-min { display: flex; align-items: center; gap: 12px; padding: 10px 18px 12px; background: var(--uk-white); border-bottom: 1px solid var(--uk-line); }
+    @media (min-width: 768px) { .uk-progress-min { padding: 14px 48px; } }
+    .uk-progress-min .label { font-size: 13px; color: var(--uk-ink-2); font-weight: 500; }
+    .uk-progress-min .label strong { color: var(--uk-primary); font-weight: 700; }
+    .uk-progress-min .uk-progress-track { flex: 1; max-width: 200px; height: 3px; }
+
+    /* ── Progress: stepper ── */
+    .uk-progress-stepper { display: flex; gap: 6px; padding: 14px 18px; background: var(--uk-white); border-bottom: 1px solid var(--uk-line); }
+    @media (min-width: 768px) { .uk-progress-stepper { padding: 18px 48px; } }
+    .uk-progress-stepper .seg { flex: 1; height: 6px; border-radius: var(--r-pill); background: var(--uk-line); transition: background 360ms var(--ease); }
+    .uk-progress-stepper .seg.done,.uk-progress-stepper .seg.active { background: var(--uk-primary); }
+
+    /* ── Branch choice ── */
+    .uk-branch { display: grid; gap: 12px; }
+    @media (min-width: 768px) { .uk-branch { grid-template-columns: 1fr 1fr; gap: 18px; } }
+    .uk-branch-card {
+      background: var(--uk-white); border: 1.5px solid var(--uk-line); border-radius: var(--r-lg);
+      padding: 20px; display: flex; align-items: flex-start; gap: 16px; cursor: pointer;
+      transition: border-color 120ms var(--ease), background 120ms var(--ease), transform 80ms var(--ease-snap);
+      text-align: left; width: 100%; font-family: inherit; color: var(--uk-ink);
+    }
+    .uk-branch-card:hover { border-color: var(--uk-primary); background: var(--uk-primary-tint); }
+    .uk-branch-card:active { transform: scale(.99); }
+    .uk-branch-card .ico { width: 48px; height: 48px; border-radius: var(--r-md); background: var(--uk-primary-tint); color: var(--uk-primary); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .uk-branch-card .body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .uk-branch-card .title { font-weight: 700; font-size: 17px; color: var(--uk-ink); letter-spacing: -.01em; }
+    .uk-branch-card .sub { font-size: 13px; color: var(--uk-muted); line-height: 1.4; }
+    .uk-branch-card .arrow { color: var(--uk-muted); }
+    @media (min-width: 768px) {
+      .uk-branch-card { padding: 28px; }
+      .uk-branch-card .ico { width: 56px; height: 56px; }
+      .uk-branch-card .title { font-size: 20px; }
+      .uk-branch-card .sub { font-size: 14px; }
+    }
+
+    /* ── Quick banner ── */
+    .uk-quick-banner {
+      background: linear-gradient(135deg, var(--uk-primary) 0%, #4D1359 100%);
+      color: var(--uk-white); border-radius: var(--r-lg); padding: 16px 18px;
+      display: flex; align-items: center; gap: 14px; cursor: pointer;
+      transition: transform 120ms var(--ease); border: 0; font-family: inherit; width: 100%; text-align: left;
+    }
+    .uk-quick-banner:hover { transform: translateY(-1px); }
+    .uk-quick-banner .icon { width: 36px; height: 36px; background: rgba(255,255,255,.18); border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .uk-quick-banner .text { flex: 1; min-width: 0; }
+    .uk-quick-banner .label { font-size: 12px; opacity: .85; font-weight: 500; }
+    .uk-quick-banner .when { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+    .uk-quick-banner .arrow { opacity: .85; }
+
+    /* ── Calendar ── */
+    .uk-calendar { background: var(--uk-white); border: 1px solid var(--uk-line); border-radius: var(--r-lg); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .uk-cal-head { display: flex; align-items: center; gap: 8px; }
+    .uk-cal-head .month { flex: 1; font-weight: 600; font-size: 16px; color: var(--uk-ink); text-align: center; letter-spacing: -.005em; text-transform: capitalize; }
+    .uk-cal-nav { width: 36px; height: 36px; border-radius: var(--r-md); border: 1px solid var(--uk-line); background: var(--uk-white); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--uk-ink-2); }
+    .uk-cal-nav:hover { background: var(--uk-line-2); }
+    .uk-cal-nav:disabled { color: var(--uk-line); cursor: not-allowed; }
+    .uk-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .uk-cal-dow { font-size: 11px; color: var(--uk-muted); text-align: center; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding: 6px 0; }
+    .uk-cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; position: relative; font-size: 14px; font-weight: 500; color: var(--uk-ink); border-radius: var(--r-md); cursor: pointer; transition: all 120ms var(--ease); background: transparent; border: 0; font-family: inherit; min-height: 44px; }
+    .uk-cal-day:hover:not(:disabled):not(.selected) { background: var(--uk-primary-tint); }
+    .uk-cal-day:disabled { color: var(--uk-line); cursor: not-allowed; }
+    .uk-cal-day.empty { visibility: hidden; }
+    .uk-cal-day.has-slots::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: var(--r-pill); background: var(--uk-primary); }
+    .uk-cal-day.today { font-weight: 700; color: var(--uk-primary); }
+    .uk-cal-day.selected { background: var(--uk-primary); color: var(--uk-white); }
+    .uk-cal-day.selected.has-slots::after { background: var(--uk-white); }
+
+    /* ── Calendar layout: 2-col on desktop ── */
+    .uk-cal-layout { display: flex; flex-direction: column; gap: 20px; }
+    @media (min-width: 768px) {
+      .uk-cal-layout { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
+      .uk-calendar { padding: 20px; }
+    }
+
+    /* ── Time slots ── */
+    .uk-slots-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px; }
+    .uk-slots-head .label { font-size: 13px; color: var(--uk-muted); font-weight: 500; text-transform: capitalize; }
+    .uk-slots-head .day { font-size: 16px; color: var(--uk-ink); font-weight: 700; letter-spacing: -.01em; }
+    .uk-slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    @media (min-width: 768px) { .uk-slots-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; } }
+    .uk-slot { appearance: none; border: 1.5px solid var(--uk-line); background: var(--uk-white); border-radius: var(--r-md); padding: 14px 8px; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--uk-ink); cursor: pointer; transition: all 120ms var(--ease); letter-spacing: -.005em; min-height: 44px; }
+    .uk-slot:hover:not(:disabled):not(.selected) { border-color: var(--uk-primary); color: var(--uk-primary); }
+    .uk-slot.selected { background: var(--uk-primary); color: var(--uk-white); border-color: var(--uk-primary); }
+    .uk-slot:disabled { color: var(--uk-line); cursor: not-allowed; background: var(--uk-line-2); border-color: transparent; }
+    .uk-slots-empty { text-align: center; padding: 24px 18px; color: var(--uk-muted); font-size: 13px; border: 1px dashed var(--uk-line); border-radius: var(--r-md); }
+    .uk-slots-period { display: flex; flex-direction: column; gap: 10px; }
+    .uk-slots-period-label { display: flex; align-items: center; gap: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--uk-muted); font-weight: 600; }
+
+    /* ── Summary card ── */
+    .uk-summary { background: var(--uk-white); border: 1px solid var(--uk-line); border-radius: var(--r-lg); overflow: hidden; }
+    .uk-summary-row { display: flex; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--uk-line-2); }
+    .uk-summary-row:last-child { border-bottom: 0; }
+    .uk-summary-row .label { width: 110px; font-size: 13px; color: var(--uk-muted); font-weight: 500; flex-shrink: 0; }
+    .uk-summary-row .value { flex: 1; font-size: 15px; color: var(--uk-ink); font-weight: 500; letter-spacing: -.005em; }
+    .uk-summary-row .edit { background: none; border: 0; color: var(--uk-primary); font-size: 13px; font-weight: 500; cursor: pointer; padding: 0; }
+
+    /* ── Confirm: 2-col on desktop ── */
+    .uk-confirm-layout { display: flex; flex-direction: column; gap: 16px; }
+    @media (min-width: 768px) { .uk-confirm-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: start; } }
+
+    /* ── SMS code ── */
+    .uk-sms-display { display: flex; gap: 10px; justify-content: center; }
+    .uk-sms-cell {
+      width: 48px; height: 56px; border: 1.5px solid var(--uk-line); border-radius: var(--r-md);
+      background: var(--uk-white); font-family: var(--font-body); font-size: 22px; text-align: center;
+      color: var(--uk-ink); font-variant-numeric: tabular-nums; outline: none; padding: 0;
+      -moz-appearance: textfield; transition: border-color 120ms var(--ease);
+    }
+    .uk-sms-cell::-webkit-outer-spin-button, .uk-sms-cell::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .uk-sms-cell.filled { border-color: var(--uk-primary); }
+    .uk-sms-cell:focus { border-color: var(--uk-primary); box-shadow: var(--sh-focus); }
+    .uk-sms-info { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13px; color: var(--uk-muted); }
+    .uk-sms-info .timer { color: var(--uk-ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+    .uk-sms-resend { background: none; border: 0; color: var(--uk-primary); font-weight: 500; cursor: pointer; font-size: 13px; }
+    .uk-sms-resend:disabled { color: var(--uk-muted); cursor: not-allowed; }
+
+    /* ── Success ── */
+    .uk-success-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 24px; gap: 18px; }
+    .uk-success-circle { width: 88px; height: 88px; border-radius: var(--r-pill); background: var(--uk-success-tint); color: var(--uk-success); display: inline-flex; align-items: center; justify-content: center; }
+    .uk-success-card { width: 100%; max-width: 360px; background: var(--uk-white); border: 1px solid var(--uk-line); border-radius: var(--r-lg); padding: 18px; text-align: left; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+
+    /* ── Doctor row ── */
+    .uk-doctor-row { background: var(--uk-white); border: 1.5px solid var(--uk-line); border-radius: var(--r-lg); padding: 14px; display: flex; align-items: center; gap: 14px; cursor: pointer; width: 100%; font-family: inherit; text-align: left; transition: border-color 120ms var(--ease), background 120ms var(--ease); border: 1.5px solid var(--uk-line); }
+    .uk-doctor-row:hover { border-color: var(--uk-primary-tint-2); }
+    .uk-doctor-row.selected { border-color: var(--uk-primary); background: var(--uk-primary-tint); }
+    .uk-doctor-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .uk-doctor-name { font-weight: 600; font-size: 15px; color: var(--uk-ink); letter-spacing: -.005em; }
+    .uk-doctor-spec { font-size: 13px; color: var(--uk-muted); }
+    .uk-doctor-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+    .uk-doctor-avail { font-size: 11px; color: var(--uk-success); font-weight: 600; background: var(--uk-success-tint); padding: 2px 8px; border-radius: var(--r-pill); letter-spacing: -.005em; }
+
+    /* ── Treatment dropdown ── */
+    .uk-treatment-select { background: var(--uk-white); border: 1.5px solid var(--uk-line); border-radius: var(--r-lg); overflow: hidden; }
+    .uk-treatment-trigger { width: 100%; background: transparent; border: 0; padding: 16px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; font-family: inherit; text-align: left; min-height: 56px; }
+    .uk-treatment-trigger .label { flex: 1; font-size: 15px; color: var(--uk-ink); font-weight: 500; letter-spacing: -.005em; }
+    .uk-treatment-trigger .label.placeholder { color: var(--uk-muted); font-weight: 400; }
+    .uk-treatment-trigger .chevron { color: var(--uk-muted); transition: transform 200ms var(--ease); }
+    .uk-treatment-select.open .uk-treatment-trigger .chevron { transform: rotate(180deg); }
+    .uk-treatment-list { max-height: 0; overflow: hidden; transition: max-height 240ms var(--ease); }
+    .uk-treatment-select.open .uk-treatment-list { max-height: 480px; border-top: 1px solid var(--uk-line); overflow-y: auto; }
+    .uk-treatment-cat { padding: 12px 18px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--uk-muted); font-weight: 700; background: var(--uk-paper); }
+    .uk-treatment-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px; cursor: pointer; border-top: 1px solid var(--uk-line-2); transition: background 120ms var(--ease); min-height: 44px; }
+    .uk-treatment-item:hover { background: var(--uk-primary-tint); }
+    .uk-treatment-item.selected { background: var(--uk-primary-tint); }
+    .uk-treatment-item .name { font-size: 14px; color: var(--uk-ink); font-weight: 500; flex: 1; min-width: 0; letter-spacing: -.005em; }
+    .uk-treatment-item .duration { font-size: 12px; color: var(--uk-muted); flex-shrink: 0; }
+    .uk-treatment-search { padding: 10px 12px; border-bottom: 1px solid var(--uk-line); background: var(--uk-paper); }
+
+    /* ── Helpers ── */
+    .uk-stack { display: flex; flex-direction: column; }
+    .uk-stack-2{gap:8px}.uk-stack-3{gap:12px}.uk-stack-4{gap:16px}.uk-stack-5{gap:20px}.uk-stack-6{gap:24px}
+    .uk-row-flex { display: flex; gap: 10px; align-items: center; }
+    .uk-row-flex.between { justify-content: space-between; }
+    .uk-row-flex.wrap { flex-wrap: wrap; }
+    .uk-divider { height: 1px; background: var(--uk-line); border: 0; margin: 4px 0; }
+    .uk-link { color: var(--uk-primary); cursor: pointer; font-weight: 500; }
+    .uk-link:hover { text-decoration: underline; }
+    .uk-empty { text-align: center; padding: 40px 24px; color: var(--uk-muted); font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .uk-empty .icon { color: var(--uk-line); margin-bottom: 4px; }
+    .uk-notice { background: var(--uk-primary-tint); border: 1px solid var(--uk-primary-tint-2); border-radius: var(--r-md); padding: 12px 14px; font-size: 13px; color: var(--uk-primary-press); display: flex; gap: 10px; align-items: flex-start; }
+    .uk-notice .icon { color: var(--uk-primary); flex-shrink: 0; margin-top: 1px; }
+    .uk-notice .text { flex: 1; line-height: 1.5; }
+
+    @keyframes uk-shimmer { 0%{background-position:-300px 0} 100%{background-position:300px 0} }
+    .uk-skeleton { background: linear-gradient(90deg, var(--uk-line-2) 0%, var(--uk-line) 50%, var(--uk-line-2) 100%); background-size: 600px 100%; animation: uk-shimmer 1.4s linear infinite; border-radius: var(--r-md); }
+
+    .uk-autosave-tag { position: absolute; top: 14px; right: 18px; font-size: 11px; font-weight: 500; display: flex; align-items: center; gap: 4px; background: var(--uk-success-tint); color: var(--uk-success); padding: 4px 8px; border-radius: var(--r-pill); opacity: 0; transform: translateY(-4px); transition: opacity 200ms var(--ease), transform 200ms var(--ease); pointer-events: none; }
+    .uk-autosave-tag.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Avatar ── */
+    .uk-avatar { width: 44px; height: 44px; border-radius: var(--r-pill); background: var(--uk-primary-tint); color: var(--uk-primary); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; letter-spacing: -.01em; }
+    .uk-avatar.lg { width: 56px; height: 56px; font-size: 17px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <!-- Data layer (plain JS, no JSX) -->
+  <script>
+const SPECIALTIES = [
+  { id: 'altalanos', name: 'Általános fogászat' },
+  { id: 'implant', name: 'Implantológia' },
+  { id: 'esztetikus', name: 'Esztétikus fogászat' },
+  { id: 'sebeszet', name: 'Szájsebészet' },
+  { id: 'parodont', name: 'Parodontológia' },
+  { id: 'endodoncia', name: 'Endodoncia' },
+  { id: 'gyermek', name: 'Gyermekfogászat' },
+  { id: 'orthodonciai', name: 'Fogszabályozás' },
+  { id: 'protetika', name: 'Protetika' },
+];
+
+const DOCTORS = [
+  { id: 'd01', name: 'Dr. Kovács Anna',     spec: 'altalanos',    yrs: 12, lang: ['HU', 'EN'] },
+  { id: 'd02', name: 'Dr. Nagy Péter',       spec: 'implant',      yrs: 18, lang: ['HU', 'EN', 'DE'] },
+  { id: 'd03', name: 'Dr. Szabó Eszter',     spec: 'esztetikus',   yrs: 9,  lang: ['HU', 'EN'] },
+  { id: 'd04', name: 'Dr. Tóth Gábor',       spec: 'sebeszet',     yrs: 22, lang: ['HU'] },
+  { id: 'd05', name: 'Dr. Horváth Júlia',    spec: 'parodont',     yrs: 14, lang: ['HU', 'EN'] },
+  { id: 'd06', name: 'Dr. Varga Márk',       spec: 'endodoncia',   yrs: 11, lang: ['HU', 'EN'] },
+  { id: 'd07', name: 'Dr. Kiss Réka',        spec: 'gyermek',      yrs: 8,  lang: ['HU', 'EN'] },
+  { id: 'd08', name: 'Dr. Molnár Tamás',     spec: 'orthodonciai', yrs: 15, lang: ['HU', 'DE'] },
+  { id: 'd09', name: 'Dr. Németh Bence',     spec: 'altalanos',    yrs: 6,  lang: ['HU'] },
+  { id: 'd10', name: 'Dr. Farkas Dóra',      spec: 'implant',      yrs: 13, lang: ['HU', 'EN'] },
+  { id: 'd11', name: 'Dr. Balogh András',    spec: 'protetika',    yrs: 20, lang: ['HU', 'EN'] },
+  { id: 'd12', name: 'Dr. Papp Krisztina',   spec: 'esztetikus',   yrs: 10, lang: ['HU', 'EN'] },
+  { id: 'd13', name: 'Dr. Lukács Bálint',    spec: 'sebeszet',     yrs: 7,  lang: ['HU'] },
+  { id: 'd14', name: 'Dr. Mészáros Zsófia',  spec: 'parodont',     yrs: 16, lang: ['HU', 'EN'] },
+  { id: 'd15', name: 'Dr. Oláh Levente',     spec: 'endodoncia',   yrs: 9,  lang: ['HU', 'EN'] },
+  { id: 'd16', name: 'Dr. Juhász Vera',      spec: 'gyermek',      yrs: 11, lang: ['HU', 'EN', 'DE'] },
+  { id: 'd17', name: 'Dr. Takács Ákos',      spec: 'orthodonciai', yrs: 12, lang: ['HU', 'EN'] },
+  { id: 'd18', name: 'Dr. Sándor Petra',     spec: 'altalanos',    yrs: 5,  lang: ['HU'] },
+  { id: 'd19', name: 'Dr. Bognár István',    spec: 'implant',      yrs: 24, lang: ['HU', 'EN', 'DE'] },
+  { id: 'd20', name: 'Dr. Fekete Lilla',     spec: 'esztetikus',   yrs: 8,  lang: ['HU', 'EN'] },
+  { id: 'd21', name: 'Dr. Halász Dániel',    spec: 'protetika',    yrs: 17, lang: ['HU'] },
+  { id: 'd22', name: 'Dr. Pataki Réka',      spec: 'altalanos',    yrs: 4,  lang: ['HU', 'EN'] },
+];
+
+const TREATMENT_GROUPS = [
+  { id: 'altalanos', name: 'Általános', items: [
+    { id: 't-vizsgalat',   name: 'Általános fogászati vizsgálat',  duration: 30, specs: ['altalanos', 'gyermek'] },
+    { id: 't-fogko',       name: 'Fogkőeltávolítás',               duration: 45, specs: ['altalanos', 'parodont'] },
+    { id: 't-tomes',       name: 'Esztétikus tömés',               duration: 60, specs: ['altalanos', 'esztetikus'] },
+    { id: 't-konzult',     name: 'Konzultáció',                    duration: 30, specs: ['altalanos', 'implant', 'orthodonciai'] },
+  ]},
+  { id: 'esztetikai', name: 'Esztétikai kezelések', items: [
+    { id: 't-feheritese',  name: 'Fogfehérítés',                   duration: 90, specs: ['esztetikus'] },
+    { id: 't-hejak',       name: 'Esztétikus héjak',               duration: 75, specs: ['esztetikus'] },
+    { id: 't-korona',      name: 'Korona / híd készítés',          duration: 90, specs: ['esztetikus', 'protetika'] },
+  ]},
+  { id: 'sebeszet', name: 'Sebészet & Implantológia', items: [
+    { id: 't-implant-konz',name: 'Implantátum konzultáció',        duration: 45, specs: ['implant'] },
+    { id: 't-implant',     name: 'Implantátum beültetés',          duration: 90, specs: ['implant', 'sebeszet'] },
+    { id: 't-foghuzas',    name: 'Foghúzás',                       duration: 45, specs: ['sebeszet', 'altalanos'] },
+    { id: 't-szajsebeszet',name: 'Szájsebészeti beavatkozás',      duration: 60, specs: ['sebeszet'] },
+  ]},
+  { id: 'specialis', name: 'Speciális kezelések', items: [
+    { id: 't-gyokerkez',   name: 'Gyökérkezelés',                  duration: 75, specs: ['endodoncia', 'altalanos'] },
+    { id: 't-parodont',    name: 'Parodontológiai kezelés',        duration: 60, specs: ['parodont'] },
+    { id: 't-orthodoncia', name: 'Fogszabályozás konzultáció',     duration: 45, specs: ['orthodonciai'] },
+    { id: 't-gyermek',     name: 'Gyermekfogászati vizsgálat',     duration: 30, specs: ['gyermek'] },
+  ]},
+];
+
+const ALL_TREATMENTS = TREATMENT_GROUPS.flatMap(g => g.items);
+
+function hash(str) { let h = 0; for (let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0; return Math.abs(h); }
+
+function dateStr(year, month, day) { return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }
+
+function getSlotsFor(doctorId, dateString) {
+  const d = new Date(dateString + 'T00:00:00');
+  const dow = d.getDay();
+  if (dow === 0) return [];
+  const seed = hash(doctorId + dateString);
+  if (seed % 100 < 15) return [];
+  const slots = [];
+  const morningEnd = dow === 6 ? 12 : 13;
+  const afternoonEnd = dow === 6 ? 13 : 18;
+  for (let h = 8; h < morningEnd; h++) {
+    if ((seed >> h) & 1) slots.push(`${String(h).padStart(2,'0')}:00`);
+    if ((seed >> (h+8)) & 1) slots.push(`${String(h).padStart(2,'0')}:30`);
+  }
+  if (dow !== 6) for (let h = 14; h < afternoonEnd; h++) {
+    if ((seed >> h) & 1) slots.push(`${String(h).padStart(2,'0')}:00`);
+    if ((seed >> (h+8)) & 1) slots.push(`${String(h).padStart(2,'0')}:30`);
+  }
+  return slots;
+}
+
+function getAggregatedSlots(treatmentId, dateString) {
+  const t = ALL_TREATMENTS.find(x => x.id === treatmentId);
+  if (!t) return [];
+  const set = new Set();
+  DOCTORS.filter(d => t.specs.includes(d.spec)).forEach(d => getSlotsFor(d.id, dateString).forEach(s => set.add(s)));
+  return Array.from(set).sort();
+}
+
+function getDoctorsForTreatment(treatmentId) {
+  const t = ALL_TREATMENTS.find(x => x.id === treatmentId);
+  return t ? DOCTORS.filter(d => t.specs.includes(d.spec)) : DOCTORS;
+}
+
+function getTreatmentsForDoctor(doctorId) {
+  const doc = DOCTORS.find(d => d.id === doctorId);
+  return doc ? ALL_TREATMENTS.filter(t => t.specs.includes(doc.spec)) : ALL_TREATMENTS;
+}
+
+function specName(id) { const s = SPECIALTIES.find(x => x.id === id); return s ? s.name : id; }
+
+function findEarliestSlot(treatmentId = null) {
+  const today = new Date();
+  for (let offset = 0; offset < 60; offset++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + offset);
+    const ds = d.toISOString().slice(0, 10);
+    const docs = treatmentId ? getDoctorsForTreatment(treatmentId) : DOCTORS;
+    for (const doc of docs) {
+      const slots = getSlotsFor(doc.id, ds);
+      if (slots.length) return { date: ds, time: slots[0], doctor: doc };
+    }
+  }
+  return null;
+}
+
+const HU_MONTHS_LONG = ['január','február','március','április','május','június','július','augusztus','szeptember','október','november','december'];
+const HU_MONTHS_SHORT = ['jan','feb','márc','ápr','máj','jún','júl','aug','szept','okt','nov','dec'];
+const HU_DOW_LONG = ['vasárnap','hétfő','kedd','szerda','csütörtök','péntek','szombat'];
+
+function formatDateLong(ds) { const d = new Date(ds + 'T00:00:00'); return `${d.getFullYear()}. ${HU_MONTHS_LONG[d.getMonth()]} ${d.getDate()}. ${HU_DOW_LONG[d.getDay()]}`; }
+function formatDateShort(ds) { const d = new Date(ds + 'T00:00:00'); return `${HU_MONTHS_SHORT[d.getMonth()]} ${d.getDate()}.`; }
+function formatRelative(ds) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(ds + 'T00:00:00');
+  const diff = Math.round((d - today) / 86400000);
+  if (diff === 0) return 'ma';
+  if (diff === 1) return 'holnap';
+  if (diff < 7) return HU_DOW_LONG[d.getDay()];
+  return formatDateShort(ds);
+}
+
+Object.assign(window, { SPECIALTIES, DOCTORS, TREATMENT_GROUPS, ALL_TREATMENTS, getSlotsFor, getAggregatedSlots, getDoctorsForTreatment, getTreatmentsForDoctor, specName, findEarliestSlot, dateStr, HU_MONTHS_LONG, formatDateLong, formatDateShort, formatRelative });
+  </script>
+
+  <!-- Components + Screens + App (JSX via Babel) -->
+  <script type="text/babel">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+// ── Icons
+const Icon = {
+  back: (p={}) => <svg width="20" height="20" viewBox="0 0 20 20" fill="none" {...p}><path d="M12.5 5L7.5 10L12.5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  arrow: (p={}) => <svg width="20" height="20" viewBox="0 0 20 20" fill="none" {...p}><path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  chevronDown: (p={}) => <svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...p}><path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  search: (p={}) => <svg width="18" height="18" viewBox="0 0 18 18" fill="none" {...p}><circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.8"/><path d="M12 12L15 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+  close: (p={}) => <svg width="14" height="14" viewBox="0 0 14 14" fill="none" {...p}><path d="M3 3L11 11M11 3L3 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+  user: (p={}) => <svg width="18" height="18" viewBox="0 0 18 18" fill="none" {...p}><circle cx="9" cy="6" r="3" stroke="currentColor" strokeWidth="1.6"/><path d="M3 16C3 12.5 5.5 11 9 11C12.5 11 15 12.5 15 16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>,
+  mail: (p={}) => <svg width="18" height="18" viewBox="0 0 18 18" fill="none" {...p}><rect x="2" y="4" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.6"/><path d="M2 5L9 10L16 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  phone: (p={}) => <svg width="18" height="18" viewBox="0 0 18 18" fill="none" {...p}><path d="M3 4C3 3.4 3.4 3 4 3H6L7.5 6.5L5.5 7.5C6.5 9.5 8.5 11.5 10.5 12.5L11.5 10.5L15 12V14C15 14.6 14.6 15 14 15C7.9 15 3 10.1 3 4Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/></svg>,
+  doctor: (p={}) => <svg width="22" height="22" viewBox="0 0 22 22" fill="none" {...p}><path d="M5 19V17C5 14.5 7 13 11 13C15 13 17 14.5 17 17V19" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><circle cx="11" cy="7" r="3.5" stroke="currentColor" strokeWidth="1.6"/></svg>,
+  treatment: (p={}) => <svg width="22" height="22" viewBox="0 0 22 22" fill="none" {...p}><path d="M11 3C8 3 6.5 5 6.5 7C6.5 8.5 7 10 7 12V17C7 18 7.5 19 8.5 19C9.5 19 9.5 18 9.5 17V14C9.5 13.5 10 13 11 13C12 13 12.5 13.5 12.5 14V17C12.5 18 12.5 19 13.5 19C14.5 19 15 18 15 17V12C15 10 15.5 8.5 15.5 7C15.5 5 14 3 11 3Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/></svg>,
+  bolt: (p={}) => <svg width="20" height="20" viewBox="0 0 20 20" fill="none" {...p}><path d="M11 2L4 11H10L9 18L16 9H10L11 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" fill="currentColor" fillOpacity="0.2"/></svg>,
+  check: (p={}) => <svg width="20" height="20" viewBox="0 0 20 20" fill="none" {...p}><path d="M5 10.5L8.5 14L15 6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  checkLarge: (p={}) => <svg width="44" height="44" viewBox="0 0 44 44" fill="none" {...p}><path d="M12 22.5L19 30L33 14" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  info: (p={}) => <svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...p}><circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.6"/><path d="M8 7V11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><circle cx="8" cy="5" r="0.8" fill="currentColor"/></svg>,
+  clock: (p={}) => <svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...p}><circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.6"/><path d="M8 4V8L10.5 9.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  shield: (p={}) => <svg width="18" height="18" viewBox="0 0 18 18" fill="none" {...p}><path d="M9 2L3 4V9C3 12.5 5.5 15 9 16C12.5 15 15 12.5 15 9V4L9 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><path d="M6.5 9L8 10.5L11.5 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  pencil: (p={}) => <svg width="14" height="14" viewBox="0 0 14 14" fill="none" {...p}><path d="M9.5 2.5L11.5 4.5L4 12L1.5 12.5L2 10L9.5 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  globe: (p={}) => <svg width="14" height="14" viewBox="0 0 14 14" fill="none" {...p}><circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.4"/><path d="M7 1.5C9 4 9 10 7 12.5M7 1.5C5 4 5 10 7 12.5M1.5 7H12.5" stroke="currentColor" strokeWidth="1.4"/></svg>,
+};
+
+// ── Progress
+const STEPS = ['Adatok', 'Választás', 'Időpont', 'Megerősítés'];
+function ProgressIndicator({ step, onStepClick }) {
+  const fillPct = ((step + 1) / STEPS.length) * 100;
+  return (
+    <div className="uk-progress-bar">
+      <div className="uk-progress-track"><div className="uk-progress-fill" style={{ width: fillPct + '%' }} /></div>
+      <div className="uk-progress-labels">
+        {STEPS.map((label, i) => {
+          const isDone = i < step;
+          const isActive = i === step;
+          return (
+            <button
+              key={i}
+              type="button"
+              className={isDone ? 'done' : isActive ? 'active' : ''}
+              onClick={isDone && onStepClick ? () => onStepClick(i) : undefined}
+              disabled={!isDone}
+              title={isDone ? `Vissza: ${label}` : undefined}
+            >{label}</button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Top bar
+function TopBar({ title, onBack, canBack, isDesktop }) {
+  if (isDesktop) return (
+    <div className="uk-topbar-desktop">
+      <div className="uk-topbar-logo">uniklinik<span className="dot">.</span></div>
+      <nav>
+        <a>Fogászat</a><a>Esztétikai</a><a>Implantológia</a><a>Esettanulmányok</a><a>Csapatunk</a>
+        <a className="active">Időpontfoglalás</a>
+      </nav>
+      <div className="right">
+        <Icon.phone style={{ verticalAlign: 'middle', marginRight: 6 }} />
+        <span className="phone">+36 1 783 8696</span>
+      </div>
+    </div>
+  );
+  return (
+    <div className="uk-topbar">
+      <button className="uk-topbar-back" onClick={onBack} disabled={!canBack} aria-label="Vissza"><Icon.back /></button>
+      <div className="uk-topbar-title">{title}</div>
+      <button className="uk-topbar-help">Súgó</button>
+    </div>
+  );
+}
+
+// ── Action bar
+function ActionBar({ left, right, summary }) {
+  return (
+    <div className="uk-actionbar">
+      {summary && <div className="summary">{summary}</div>}
+      {left}{right}
+    </div>
+  );
+}
+
+// ── Search input
+function SearchInput({ value, onChange, placeholder }) {
+  return (
+    <div className="uk-search">
+      <span className="uk-search-icon"><Icon.search /></span>
+      <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} autoComplete="off" />
+      {value && <button className="uk-search-clear" onClick={() => onChange('')} aria-label="Törlés"><Icon.close /></button>}
+    </div>
+  );
+}
+
+// ── Treatment select
+function TreatmentSelect({ value, onChange, doctor = null, autoOpen = false }) {
+  const [open, setOpen] = useState(autoOpen);
+  const [search, setSearch] = useState('');
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    setTimeout(() => document.addEventListener('mousedown', handler), 0);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const groups = useMemo(() => {
+    const docSet = doctor ? new Set(getTreatmentsForDoctor(doctor.id).map(t => t.id)) : null;
+    return TREATMENT_GROUPS.map(g => ({
+      ...g,
+      items: g.items.filter(t => {
+        if (docSet && !docSet.has(t.id)) return false;
+        if (search && !t.name.toLowerCase().includes(search.toLowerCase())) return false;
+        return true;
+      }),
+    })).filter(g => g.items.length > 0);
+  }, [doctor, search]);
+
+  const selected = ALL_TREATMENTS.find(t => t.id === value);
+  return (
+    <div ref={ref} className={'uk-treatment-select' + (open ? ' open' : '')}>
+      <button className="uk-treatment-trigger" onClick={() => setOpen(!open)}>
+        <Icon.treatment style={{ color: 'var(--uk-primary)', flexShrink: 0 }} />
+        <span className={'label' + (selected ? '' : ' placeholder')}>{selected ? selected.name : 'Válassz kezelést…'}</span>
+        {selected && <span style={{ fontSize: 12, color: 'var(--uk-muted)', marginRight: 8 }}>{selected.duration} perc</span>}
+        <Icon.chevronDown className="chevron" />
+      </button>
+      <div className="uk-treatment-list">
+        <div className="uk-treatment-search">
+          <SearchInput value={search} onChange={setSearch} placeholder="Keresés a kezelések között…" />
+        </div>
+        {groups.length === 0
+          ? <div className="uk-empty" style={{ padding: '24px 16px' }}>Nincs találat.</div>
+          : groups.map(g => (
+            <div key={g.id}>
+              <div className="uk-treatment-cat">{g.name}</div>
+              {g.items.map(t => (
+                <div key={t.id} className={'uk-treatment-item' + (t.id === value ? ' selected' : '')}
+                  onClick={() => { onChange(t); setOpen(false); setSearch(''); }}>
+                  <span className="name">{t.name}</span>
+                  <span className="duration">{t.duration} perc</span>
+                </div>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  );
+}
+
+// ── Doctor row
+function initials(name) {
+  const parts = name.replace(/^Dr\.\s*/, '').split(/\s+/);
+  return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+
+function DoctorRow({ doctor, selected, onClick }) {
+  const avail = useMemo(() => {
+    for (let off = 0; off < 14; off++) {
+      const d = new Date(); d.setDate(d.getDate() + off);
+      const ds = d.toISOString().slice(0, 10);
+      const slots = getSlotsFor(doctor.id, ds);
+      if (slots.length) return { date: ds, slot: slots[0] };
+    }
+    return null;
+  }, [doctor.id]);
+
+  return (
+    <button className={'uk-doctor-row' + (selected ? ' selected' : '')} onClick={onClick}>
+      <div className="uk-avatar lg">{initials(doctor.name)}</div>
+      <div className="uk-doctor-body">
+        <div className="uk-doctor-name">{doctor.name}</div>
+        <div className="uk-doctor-spec">{specName(doctor.spec)} · {doctor.yrs} év tapasztalat</div>
+        <div className="uk-doctor-meta">
+          {avail && <span className="uk-doctor-avail">{formatRelative(avail.date)} {avail.slot}-tól</span>}
+          <span className="uk-tag muted"><Icon.globe style={{ width: 11, height: 11 }} />{doctor.lang.join(' · ')}</span>
+        </div>
+      </div>
+      <Icon.arrow style={{ color: 'var(--uk-muted)', flexShrink: 0 }} />
+    </button>
+  );
+}
+
+// ── Calendar
+function Calendar({ value, onChange, hasSlotsForDate }) {
+  const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d; }, []);
+  const init = useMemo(() => value ? new Date(value + 'T00:00:00') : new Date(today), [value]);
+  const [viewYear, setViewYear] = useState(init.getFullYear());
+  const [viewMonth, setViewMonth] = useState(init.getMonth());
+
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  let lead = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
+  const days = [...Array(lead).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+  const monthLabel = `${viewYear}. ${HU_MONTHS_LONG[viewMonth]}`;
+  const canPrev = viewYear > today.getFullYear() || (viewYear === today.getFullYear() && viewMonth > today.getMonth());
+  const prev = () => { if (!canPrev) return; viewMonth === 0 ? (setViewMonth(11), setViewYear(y => y - 1)) : setViewMonth(m => m - 1); };
+  const next = () => { viewMonth === 11 ? (setViewMonth(0), setViewYear(y => y + 1)) : setViewMonth(m => m + 1); };
+
+  return (
+    <div className="uk-calendar">
+      <div className="uk-cal-head">
+        <button className="uk-cal-nav" onClick={prev} disabled={!canPrev} aria-label="Előző hónap"><Icon.back /></button>
+        <div className="month">{monthLabel}</div>
+        <button className="uk-cal-nav" onClick={next} aria-label="Következő hónap"><Icon.arrow /></button>
+      </div>
+      <div className="uk-cal-grid">
+        {['H','K','Sze','Cs','P','Szo','V'].map(d => <div key={d} className="uk-cal-dow">{d}</div>)}
+        {days.map((d, i) => {
+          if (d === null) return <div key={i} className="uk-cal-day empty" />;
+          const ds = dateStr(viewYear, viewMonth, d);
+          const date = new Date(viewYear, viewMonth, d);
+          const isPast = date < today;
+          const isToday = date.getTime() === today.getTime();
+          const isSelected = ds === value;
+          const has = !isPast && hasSlotsForDate(ds);
+          return (
+            <button key={i}
+              className={'uk-cal-day' + (isSelected ? ' selected' : '') + (isToday ? ' today' : '') + (has ? ' has-slots' : '')}
+              disabled={isPast || !has}
+              onClick={() => onChange(ds)}
+            >{d}</button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Time slots
+function TimeSlots({ slots, value, onChange }) {
+  if (!slots || !slots.length) return <div className="uk-slots-empty">Erre a napra nincs szabad időpont. Válassz másik napot.</div>;
+  const morning = slots.filter(s => parseInt(s) < 12);
+  const afternoon = slots.filter(s => parseInt(s) >= 12);
+  const Group = ({ label, items }) => !items.length ? null : (
+    <div className="uk-slots-period">
+      <div className="uk-slots-period-label"><Icon.clock /> {label}</div>
+      <div className="uk-slots-grid">
+        {items.map(s => <button key={s} className={'uk-slot' + (s === value ? ' selected' : '')} onClick={() => onChange(s)}>{s}</button>)}
+      </div>
+    </div>
+  );
+  return (
+    <div className="uk-stack uk-stack-5">
+      <Group label="Délelőtt" items={morning} />
+      <Group label="Délután" items={afternoon} />
+    </div>
+  );
+}
+
+// ── SMS code input
+function SMSCode({ value, onChange, length = 6, autoFocus = false }) {
+  const refs = useRef([]);
+  useEffect(() => {
+    if (autoFocus) { const id = setTimeout(() => refs.current[0] && refs.current[0].focus(), 200); return () => clearTimeout(id); }
+  }, [autoFocus]);
+
+  const setChar = (i, ch) => {
+    const digits = ch.replace(/\D/g, '');
+    if (!digits) { onChange(value.slice(0, i) + value.slice(i + 1)); return; }
+    if (digits.length > 1) {
+      const next = (value.slice(0, i) + digits + value.slice(i + digits.length)).slice(0, length);
+      onChange(next);
+      setTimeout(() => { const m = refs.current[Math.min(length-1, i+digits.length)]; m && m.focus(); }, 0);
+      return;
+    }
+    onChange((value.slice(0, i) + digits[0] + value.slice(i + 1)).slice(0, length));
+    if (i < length - 1) setTimeout(() => refs.current[i+1] && refs.current[i+1].focus(), 0);
+  };
+
+  const handleKeyDown = (i, e) => {
+    if (e.key === 'Backspace' && !value[i] && i > 0) {
+      e.preventDefault();
+      refs.current[i-1] && refs.current[i-1].focus();
+      onChange(value.slice(0, i-1) + value.slice(i));
+    } else if (e.key === 'ArrowLeft' && i > 0) { e.preventDefault(); refs.current[i-1] && refs.current[i-1].focus(); }
+    else if (e.key === 'ArrowRight' && i < length-1) { e.preventDefault(); refs.current[i+1] && refs.current[i+1].focus(); }
+  };
+
+  const handlePaste = e => {
+    const digits = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, length);
+    if (digits) { e.preventDefault(); onChange(digits); setTimeout(() => { const m = refs.current[Math.min(length-1, digits.length)]; m && m.focus(); }, 0); }
+  };
+
+  return (
+    <div className="uk-sms-display">
+      {Array.from({ length }, (_, i) => (
+        <input key={i} ref={el => refs.current[i] = el}
+          className={'uk-sms-cell' + (value[i] ? ' filled' : '')}
+          type="tel" inputMode="numeric" maxLength={1}
+          value={value[i] || ''}
+          onChange={e => setChar(i, e.target.value)}
+          onKeyDown={e => handleKeyDown(i, e)}
+          onPaste={handlePaste}
+          onFocus={e => e.target.select()}
+          autoComplete={i === 0 ? 'one-time-code' : 'off'}
+          aria-label={`Kód ${i+1}. számjegye`}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Auto-save tag
+function AutoSaveTag({ visible }) {
+  return <div className={'uk-autosave-tag' + (visible ? ' visible' : '')}><Icon.check style={{ width: 12, height: 12 }} /> Mentve</div>;
+}
+
+// ════════════════════════════════════ SCREENS ════════════════════════════════════
+
+// Screen 1: Data
+function DataScreen({ data, onChange, onContinue, autoSaving }) {
+  const [errors, setErrors] = useState({});
+  const validate = () => {
+    const e = {};
+    if (!data.name || data.name.trim().length < 2) e.name = 'Add meg a teljes neved';
+    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) e.email = 'Érvényes email cím szükséges';
+    if (!data.phone || data.phone.replace(/\D/g, '').length < 9) e.phone = 'Érvényes telefonszám szükséges';
+    setErrors(e);
+    return !Object.keys(e).length;
+  };
+  const upd = (key, val) => { onChange({ ...data, [key]: val }); if (errors[key]) setErrors({ ...errors, [key]: undefined }); };
+  const valid = data.name && data.email && data.phone && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email) && data.phone.replace(/\D/g, '').length >= 9;
+
+  return (
+    <>
+      <div className="uk-content" style={{ position: 'relative' }}>
+        <AutoSaveTag visible={autoSaving} />
+        <div className="uk-stack uk-stack-3">
+          <h1 className="uk-h1">Add meg az adataid</h1>
+          <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ezekre a foglalás visszaigazolásához és az SMS kód kiküldéséhez van szükségünk.</p>
+        </div>
+        <div className="uk-stack uk-stack-4">
+          <div className="uk-field">
+            <label htmlFor="f-name">Teljes név <span className="req">*</span></label>
+            <div className="uk-field-icon-wrap">
+              <span className="icon"><Icon.user /></span>
+              <input id="f-name" className={'uk-input' + (errors.name ? ' has-error' : '')} type="text" value={data.name} onChange={e => upd('name', e.target.value)} placeholder="pl. Nagy Anna" autoComplete="name" />
+            </div>
+            {errors.name && <div className="uk-field-error">{errors.name}</div>}
+          </div>
+          <div className="uk-field">
+            <label htmlFor="f-email">Email cím <span className="req">*</span></label>
+            <div className="uk-field-icon-wrap">
+              <span className="icon"><Icon.mail /></span>
+              <input id="f-email" className={'uk-input' + (errors.email ? ' has-error' : '')} type="email" value={data.email} onChange={e => upd('email', e.target.value)} placeholder="pl. nagy.anna@gmail.com" autoComplete="email" />
+            </div>
+            {errors.email && <div className="uk-field-error">{errors.email}</div>}
+          </div>
+          <div className="uk-field">
+            <label htmlFor="f-phone">Telefonszám <span className="req">*</span></label>
+            <div className="uk-field-icon-wrap">
+              <span className="icon"><Icon.phone /></span>
+              <input id="f-phone" className={'uk-input' + (errors.phone ? ' has-error' : '')} type="tel" value={data.phone} onChange={e => upd('phone', e.target.value)} placeholder="+36 30 123 4567" autoComplete="tel" />
+            </div>
+            {errors.phone ? <div className="uk-field-error">{errors.phone}</div> : <div className="uk-field-help">Erre a számra küldjük az SMS kódot.</div>}
+          </div>
+        </div>
+        <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az adataid biztonságban kezeljük. A folyamat bármikor megszakítható — adataid mentődnek.</div></div>
+      </div>
+      <ActionBar right={<button className="uk-btn uk-btn-primary" disabled={!valid} onClick={() => { if (validate()) onContinue(); }} style={{ flex: 1 }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
+    </>
+  );
+}
+
+// Screen 2: Choice
+function ChoiceScreen({ onPick, onQuick }) {
+  const earliest = useMemo(() => findEarliestSlot(), []);
+  return (
+    <div className="uk-content">
+      <div className="uk-stack uk-stack-3">
+        <h1 className="uk-h1">Hogyan szeretnéd folytatni?</h1>
+        <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Választhatsz orvost, vagy a kívánt kezelésből kiindulva keresel időpontot.</p>
+      </div>
+      <div className="uk-branch">
+        <button className="uk-branch-card" onClick={() => onPick('doctor')}>
+          <div className="ico"><Icon.doctor /></div>
+          <div className="body"><div className="title">Orvost választok</div><div className="sub">Konkrét szakemberhez foglalnék időpontot. 22 orvos közül választhatsz.</div></div>
+          <Icon.arrow className="arrow" />
+        </button>
+        <button className="uk-branch-card" onClick={() => onPick('treatment')}>
+          <div className="ico"><Icon.treatment /></div>
+          <div className="body"><div className="title">Kezelést választok</div><div className="sub">Tudom, milyen beavatkozást szeretnék — mutasd a megfelelő orvost és időpontot.</div></div>
+          <Icon.arrow className="arrow" />
+        </button>
+      </div>
+      {earliest && (
+        <button className="uk-quick-banner" onClick={() => onQuick(earliest)}>
+          <div className="icon"><Icon.bolt /></div>
+          <div className="text"><div className="label">Sietős? Foglalj a legközelebbi szabad időpontra</div><div className="when">{formatRelative(earliest.date)} {earliest.time} · {earliest.doctor.name}</div></div>
+          <Icon.arrow className="arrow" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Screen 3a: Doctor picker
+function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null }) {
+  const [search, setSearch] = useState('');
+  const [specFilter, setSpecFilter] = useState('all');
+
+  const list = useMemo(() => {
+    let docs = treatment ? getDoctorsForTreatment(treatment.id) : DOCTORS;
+    if (specFilter !== 'all') docs = docs.filter(d => d.spec === specFilter);
+    if (search) { const q = search.toLowerCase(); docs = docs.filter(d => d.name.toLowerCase().includes(q) || specName(d.spec).toLowerCase().includes(q)); }
+    return docs;
+  }, [search, specFilter, treatment]);
+
+  const availSpecs = useMemo(() => {
+    const base = treatment ? getDoctorsForTreatment(treatment.id) : DOCTORS;
+    const set = new Set(base.map(d => d.spec));
+    return SPECIALTIES.filter(s => set.has(s.id));
+  }, [treatment]);
+
+  return (
+    <div className="uk-content">
+      <div className="uk-stack uk-stack-2">
+        <h1 className="uk-h1">{treatment ? 'Válassz orvost' : 'Melyik orvosra van szükséged?'}</h1>
+        {treatment
+          ? <p className="uk-small">Kezelés: <strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong> · {treatment.duration} perc</p>
+          : <p className="uk-small">22 szakorvos közül választhatsz. Keress névre vagy szakterületre.</p>
+        }
+      </div>
+      {treatment && (
+        <button className="uk-quick-banner" onClick={() => { onSelect(null); onContinue(); }}>
+          <div className="icon"><Icon.bolt /></div>
+          <div className="text"><div className="label">Mindegy, melyik orvos</div><div className="when">Mutasd a legkorábbi szabad időpontot bármelyik szakembernél</div></div>
+          <Icon.arrow className="arrow" />
+        </button>
+      )}
+      <SearchInput value={search} onChange={setSearch} placeholder="Keress orvosra név szerint…" />
+      <div className="uk-row-flex wrap" style={{ gap: 6 }}>
+        {[{ id: 'all', name: 'Mind' }, ...availSpecs].map(s => (
+          <button key={s.id} className="uk-tag" style={{ cursor: 'pointer', border: 0, fontFamily: 'inherit', background: specFilter === s.id ? 'var(--uk-primary)' : 'var(--uk-line-2)', color: specFilter === s.id ? 'var(--uk-white)' : 'var(--uk-ink-2)' }} onClick={() => setSpecFilter(s.id)}>{s.name}</button>
+        ))}
+      </div>
+      {list.length === 0
+        ? <div className="uk-empty"><Icon.search className="icon" style={{ width: 32, height: 32 }} /><div>Nincs találat. Próbálj más keresőszót vagy szűrést.</div></div>
+        : <div className="uk-stack uk-stack-3">{list.map(d => <DoctorRow key={d.id} doctor={d} selected={selected && selected.id === d.id} onClick={() => { onSelect(d); onContinue(); }} />)}</div>
+      }
+    </div>
+  );
+}
+
+// Screen 3b: Treatment picker
+function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null }) {
+  return (
+    <>
+      <div className="uk-content">
+        <div className="uk-stack uk-stack-2">
+          <h1 className="uk-h1">{doctor ? 'Milyen kezelésre érkezel?' : 'Milyen kezelést szeretnél?'}</h1>
+          {doctor
+            ? <p className="uk-small">Orvos: <strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong> · {specName(doctor.spec)}</p>
+            : <p className="uk-small">Válassz a kezelések közül — azután mutatjuk a megfelelő orvosokat és időpontokat.</p>
+          }
+        </div>
+        <TreatmentSelect value={selected ? selected.id : null} onChange={onSelect} doctor={doctor} autoOpen={true} />
+        {!doctor && <div className="uk-notice"><Icon.info className="icon" /><div className="text">Ha nem vagy biztos benne, milyen kezelésre van szükséged, válaszd a <strong>Konzultáció</strong>t — orvosunk a helyszínen ad ajánlást.</div></div>}
+      </div>
+      <ActionBar
+        summary={selected ? <><span>Választott kezelés</span><strong>{selected.name}</strong></> : null}
+        right={<button className="uk-btn uk-btn-primary" disabled={!selected} onClick={onContinue} style={{ flex: selected ? 'unset' : 1, minWidth: selected ? 140 : 0 }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
+      />
+    </>
+  );
+}
+
+// Screen 4: Calendar
+function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
+  const hasSlotsForDate = useCallback(ds => {
+    if (doctor) return getSlotsFor(doctor.id, ds).length > 0;
+    if (treatment) return getAggregatedSlots(treatment.id, ds).length > 0;
+    return false;
+  }, [doctor, treatment]);
+
+  const slotsForDate = useMemo(() => {
+    if (!value || !value.date) return [];
+    if (doctor) return getSlotsFor(doctor.id, value.date);
+    if (treatment) return getAggregatedSlots(treatment.id, value.date);
+    return [];
+  }, [value, doctor, treatment]);
+
+  return (
+    <>
+      <div className="uk-content">
+        <div className="uk-stack uk-stack-2">
+          <h1 className="uk-h1">Válassz időpontot</h1>
+          <p className="uk-small">
+            {doctor && <><strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong></>}
+            {doctor && treatment && ' · '}
+            {treatment && <><strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong> · {treatment.duration} perc</>}
+          </p>
+        </div>
+        <div className="uk-cal-layout">
+          <Calendar value={value && value.date} onChange={date => onSelect({ date, time: null })} hasSlotsForDate={hasSlotsForDate} />
+          <div className="uk-stack uk-stack-4">
+            <div className="uk-slots-head">
+              {value && value.date
+                ? <div><div className="label">{formatRelative(value.date)}</div><div className="day">{formatDateLong(value.date)}</div></div>
+                : <div><div className="label">Válassz napot</div><div className="day" style={{ color: 'var(--uk-muted)', fontWeight: 500 }}>a naptárból</div></div>
+              }
+            </div>
+            {value && value.date
+              ? <TimeSlots slots={slotsForDate} value={value.time} onChange={time => onSelect({ ...value, time })} />
+              : <div className="uk-slots-empty">A pontokkal jelölt napokon van szabad időpont. Koppints egy napra.</div>
+            }
+          </div>
+        </div>
+      </div>
+      <ActionBar
+        summary={value && value.date && value.time ? <><span>Választott időpont</span><strong>{formatRelative(value.date)} {value.time}</strong></> : null}
+        right={<button className="uk-btn uk-btn-primary" disabled={!value || !value.time} onClick={onContinue} style={{ flex: (!value || !value.time) ? 1 : 'unset', minWidth: 160 }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
+      />
+    </>
+  );
+}
+
+// Screen 5: Confirm
+function ConfirmScreen({ booking, onEdit, onSendSms }) {
+  const { data, doctor, treatment, slot } = booking;
+  return (
+    <>
+      <div className="uk-content">
+        <div className="uk-stack uk-stack-2">
+          <h1 className="uk-h1">Ellenőrizd a foglalást</h1>
+          <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ha minden adat helyes, küldjük az SMS kódot a véglegesítéshez.</p>
+        </div>
+        <div className="uk-confirm-layout">
+          <div className="uk-summary">
+            <div className="uk-summary-row">
+              <div className="label">Időpont</div>
+              <div className="value">{formatDateLong(slot.date)}<br/><span style={{ color: 'var(--uk-primary)', fontWeight: 700 }}>{slot.time}</span>{treatment && <span style={{ color: 'var(--uk-muted)', fontWeight: 400 }}> · {treatment.duration} perc</span>}</div>
+              <button className="edit" onClick={() => onEdit('calendar')}><Icon.pencil /> Mód.</button>
+            </div>
+            {doctor && <div className="uk-summary-row"><div className="label">Orvos</div><div className="value">{doctor.name}<br/><span style={{ color: 'var(--uk-muted)', fontWeight: 400, fontSize: 13 }}>{specName(doctor.spec)}</span></div><button className="edit" onClick={() => onEdit('doctor')}><Icon.pencil /> Mód.</button></div>}
+            {treatment && <div className="uk-summary-row"><div className="label">Kezelés</div><div className="value">{treatment.name}</div><button className="edit" onClick={() => onEdit('treatment')}><Icon.pencil /> Mód.</button></div>}
+            <div className="uk-summary-row">
+              <div className="label">Beteg</div>
+              <div className="value">{data.name}<br/><span style={{ color: 'var(--uk-muted)', fontWeight: 400, fontSize: 13 }}>{data.email} · {data.phone}</span></div>
+              <button className="edit" onClick={() => onEdit('data')}><Icon.pencil /> Mód.</button>
+            </div>
+          </div>
+          <div className="uk-stack uk-stack-4">
+            <div className="uk-card">
+              <div className="uk-row-flex" style={{ gap: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--r-md)', background: 'var(--uk-primary-tint)', color: 'var(--uk-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon.phone /></div>
+                <div style={{ flex: 1 }}><div className="uk-h3">SMS megerősítés</div><div className="uk-small" style={{ marginTop: 2 }}>A következő lépésben kódot küldünk erre a számra: <strong style={{ color: 'var(--uk-ink)' }}>{data.phone}</strong>.</div></div>
+              </div>
+            </div>
+            <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az időpontot 5 percre fenntartjuk, amíg megérkezik az SMS és beilleszted a kódot.</div></div>
+          </div>
+        </div>
+      </div>
+      <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-block" onClick={onSendSms}>SMS kód kérése <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
+    </>
+  );
+}
+
+// Screen 6: SMS
+function SMSScreen({ phone, onConfirm, onResend, onBack }) {
+  const [code, setCode] = useState('');
+  const [seconds, setSeconds] = useState(300);
+  const [resendCountdown, setResendCountdown] = useState(60);
+  const [error, setError] = useState(null);
+  const [fails, setFails] = useState(0);
+
+  useEffect(() => { const id = setInterval(() => setSeconds(s => Math.max(0, s - 1)), 1000); return () => clearInterval(id); }, []);
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const id = setInterval(() => setResendCountdown(s => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(id);
+  }, [resendCountdown]);
+
+  useEffect(() => {
+    if (code.length === 6) {
+      setTimeout(() => {
+        if (code === '000000') {
+          const nf = fails + 1; setFails(nf);
+          setError(nf >= 3 ? '3 sikertelen próba. Új kódot kérünk neked automatikusan.' : `Hibás kód. Próbáld újra. (${nf}/3)`);
+          if (nf >= 3) setResendCountdown(0);
+          setCode('');
+        } else { onConfirm(); }
+      }, 350);
+    }
+  }, [code]);
+
+  const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+  const secs = String(seconds % 60).padStart(2, '0');
+
+  return (
+    <div className="uk-content">
+      <div className="uk-stack uk-stack-3">
+        <h1 className="uk-h1">Add meg a kódot</h1>
+        <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>
+          6 jegyű kódot küldtünk SMS-ben erre a számra:<br/>
+          <strong style={{ color: 'var(--uk-ink)' }}>{phone}</strong>
+          <button onClick={onBack} className="uk-link" style={{ background: 'none', border: 0, marginLeft: 8, padding: 0, fontSize: 'inherit' }}>módosítás</button>
+        </p>
+      </div>
+      <div style={{ padding: '16px 0 8px' }}>
+        <SMSCode value={code} onChange={v => { setCode(v); if (error) setError(null); }} length={6} autoFocus />
+      </div>
+      {error && <div className="uk-notice" style={{ background: 'var(--uk-danger-tint)', borderColor: 'var(--uk-danger)', color: 'var(--uk-danger)' }}><Icon.info className="icon" style={{ color: 'var(--uk-danger)' }} /><div className="text">{error}</div></div>}
+      <div className="uk-sms-info"><Icon.clock /><span>Az időpont fenntartva még</span><span className="timer">{mins}:{secs}</span></div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--uk-muted)' }}>
+        Nem érkezett meg?{' '}
+        <button className="uk-sms-resend" disabled={resendCountdown > 0} onClick={() => { onResend(); setResendCountdown(60); setFails(0); setError(null); }}>
+          {resendCountdown > 0 ? `Új kód kérése (${resendCountdown}s)` : 'Új kód kérése'}
+        </button>
+      </div>
+      <div className="uk-stack uk-stack-2" style={{ marginTop: 16, padding: 14, background: 'var(--uk-paper)', border: '1px dashed var(--uk-line)', borderRadius: 'var(--r-md)' }}>
+        <div className="uk-caption">DEMÓ</div>
+        <div className="uk-small">Bármilyen 6 jegyű kód elfogadott. Hiba szimulálásához: <code style={{ background: 'var(--uk-white)', padding: '1px 6px', borderRadius: 4, fontFamily: 'ui-monospace,monospace' }}>000000</code></div>
+      </div>
+    </div>
+  );
+}
+
+// Screen 7: Success
+function SuccessScreen({ booking, onNew }) {
+  const { data, doctor, treatment, slot } = booking;
+  const [ref] = useState(() => `UK-${Math.floor(Math.random() * 90000) + 10000}`);
+  return (
+    <div className="uk-success-screen">
+      <div className="uk-success-circle"><Icon.checkLarge /></div>
+      <div className="uk-stack uk-stack-2" style={{ alignItems: 'center', textAlign: 'center' }}>
+        <h1 className="uk-h1">Foglalás véglegesítve</h1>
+        <p className="uk-body" style={{ color: 'var(--uk-ink-2)', maxWidth: 320 }}>Részletes visszaigazolást küldtünk emailben:<br/><strong style={{ color: 'var(--uk-ink)' }}>{data.email}</strong></p>
+      </div>
+      <div className="uk-success-card">
+        <div className="uk-row-flex between" style={{ marginBottom: 4 }}>
+          <span className="uk-caption" style={{ color: 'var(--uk-success)' }}>MEGERŐSÍTVE</span>
+          <span className="uk-tag success"><Icon.check style={{ width: 12, height: 12 }} /> #{ref}</span>
+        </div>
+        <div className="uk-h2" style={{ fontSize: 22, lineHeight: 1.2 }}>{formatDateLong(slot.date)}<br/><span style={{ color: 'var(--uk-primary)' }}>{slot.time}</span></div>
+        <hr className="uk-divider" />
+        {doctor && <div className="uk-small"><strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong> · {specName(doctor.spec)}</div>}
+        {treatment && <div className="uk-small">{treatment.name} · {treatment.duration} perc</div>}
+      </div>
+      <div className="uk-stack uk-stack-3" style={{ width: '100%', maxWidth: 360, marginTop: 12 }}>
+        <button className="uk-btn uk-btn-secondary uk-btn-block">Hozzáadás naptárhoz</button>
+        <button className="uk-btn uk-btn-ghost uk-btn-block" onClick={onNew}>Új foglalás indítása</button>
+      </div>
+      <div className="uk-notice" style={{ maxWidth: 360, marginTop: 12 }}>
+        <Icon.info className="icon" />
+        <div className="text">A megjelenés előtt 24 órával emlékeztető SMS-t küldünk. Ha nem tudsz jönni, az emailben található linkre kattintva tudod lemondani vagy módosítani.</div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════ APP ════════════════════════════════════
+
+const PROGRESS_STEP_OF = { data:0, choice:1, doctor:1, treatment:1, doctorAfterTreatment:1, treatmentAfterDoctor:1, calendar:2, confirm:3, sms:3, success:3 };
+const SCREEN_TITLES = { data:'Adatok megadása', choice:'Folytatás', doctor:'Orvos választás', treatment:'Kezelés választás', doctorAfterTreatment:'Orvos választás', treatmentAfterDoctor:'Kezelés választás', calendar:'Időpont választás', confirm:'Megerősítés', sms:'SMS hitelesítés', success:'Kész' };
+const STORAGE_KEY = 'uniklinik-booking-v3';
+
+function loadInitial() {
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
+  return { screen: 'data', history: [], data: { name: '', email: '', phone: '' }, flow: null, doctor: null, treatment: null, slot: null };
+}
+
+function useIsDesktop() {
+  const mq = typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)') : null;
+  const [isDesktop, setIsDesktop] = useState(mq ? mq.matches : false);
+  useEffect(() => {
+    if (!mq) return;
+    const handler = e => setIsDesktop(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return isDesktop;
+}
+
+function BookingApp() {
+  const isDesktop = useIsDesktop();
+  const [state, setState] = useState(loadInitial);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const saveTimer = useRef(null);
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+    setAutoSaving(true);
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => setAutoSaving(false), 1200);
+  }, [state.data, state.doctor, state.treatment, state.slot]);
+
+  const goTo = useCallback(screen => setState(s => ({ ...s, screen, history: [...s.history, s.screen] })), []);
+  const goBack = useCallback(() => setState(s => {
+    if (!s.history.length) return s;
+    return { ...s, screen: s.history[s.history.length - 1], history: s.history.slice(0, -1) };
+  }), []);
+  const reset = useCallback(() => {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    setState({ screen: 'data', history: [], data: { name: '', email: '', phone: '' }, flow: null, doctor: null, treatment: null, slot: null });
+  }, []);
+  const update = useCallback(patch => setState(s => ({ ...s, ...patch })), []);
+
+  const handleEdit = target => {
+    if (target === 'calendar') goTo('calendar');
+    else if (target === 'doctor') goTo(state.flow === 'treatment-first' ? 'doctorAfterTreatment' : 'doctor');
+    else if (target === 'treatment') goTo(state.flow === 'doctor-first' || state.doctor ? 'treatmentAfterDoctor' : 'treatment');
+    else if (target === 'data') goTo('data');
+  };
+
+  const STEP_SCREENS = ['data', 'choice', 'calendar', 'confirm'];
+  const handleStepClick = useCallback((stepIdx) => {
+    goTo(STEP_SCREENS[stepIdx]);
+  }, [goTo]);
+
+  const screen = state.screen;
+  const stepIndex = PROGRESS_STEP_OF[screen] ?? 0;
+  const canBack = state.history.length > 0 && screen !== 'success';
+
+  const renderScreen = () => {
+    switch (screen) {
+      case 'data': return <DataScreen data={state.data} onChange={data => update({ data })} onContinue={() => goTo('choice')} autoSaving={autoSaving} />;
+      case 'choice': return <ChoiceScreen onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
+      case 'doctor': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} />;
+      case 'treatment': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first' })} onContinue={() => goTo('doctorAfterTreatment')} />;
+      case 'doctorAfterTreatment': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d })} onContinue={() => goTo('calendar')} treatment={state.treatment} />;
+      case 'treatmentAfterDoctor': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => goTo('calendar')} doctor={state.doctor} />;
+      case 'calendar': return <CalendarScreen doctor={state.doctor} treatment={state.treatment} value={state.slot} onSelect={slot => update({ slot })} onContinue={() => goTo('confirm')} />;
+      case 'confirm': return <ConfirmScreen booking={state} onEdit={handleEdit} onSendSms={() => goTo('sms')} />;
+      case 'sms': return <SMSScreen phone={state.data.phone} onConfirm={() => goTo('success')} onResend={() => {}} onBack={() => goTo('data')} />;
+      case 'success': return <SuccessScreen booking={state} onNew={reset} />;
+      default: return null;
+    }
+  };
+
+  return (
+    <div className={'uk-app' + (isDesktop ? ' is-desktop' : '')}>
+      <TopBar title={SCREEN_TITLES[screen]} onBack={goBack} canBack={canBack} isDesktop={isDesktop} />
+      {screen !== 'success' && <ProgressIndicator step={stepIndex} onStepClick={handleStepClick} />}
+      <div className="uk-body-scroll">
+        {renderScreen()}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<BookingApp />);
+  </script>
+</body>
+</html>
