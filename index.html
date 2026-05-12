@@ -129,7 +129,12 @@
     /* ── Content padding ── */
     .uk-content { padding: 20px 18px 24px; display: flex; flex-direction: column; gap: 18px; flex: 1; }
     @media (min-width: 768px) {
-      .uk-content { padding: 32px 48px 48px; max-width: 1200px; margin: 0 auto; width: 100%; }
+      .uk-content { padding: 32px max(48px, calc((100% - 1100px) / 2)) 48px; }
+    }
+    /* Narrow column wrapper for form-only screens (DataScreen, SMSScreen) */
+    .uk-col-form { width: 100%; display: flex; flex-direction: column; gap: 18px; }
+    @media (min-width: 1024px) {
+      .uk-col-form { max-width: 620px; }
     }
     .uk-section-head { display: flex; flex-direction: column; gap: 6px; }
     .uk-section-head .uk-eyebrow { font-size: 12px; color: var(--uk-primary); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
@@ -143,7 +148,12 @@
       display: flex; gap: 10px; flex-shrink: 0; z-index: 5;
     }
     @media (min-width: 768px) {
-      .uk-actionbar { padding: 18px 48px; }
+      .uk-actionbar { padding: 18px max(48px, calc((100% - 1100px) / 2)); }
+    }
+    .uk-btn-cta { flex: 1; }
+    @media (min-width: 1024px) {
+      .uk-actionbar { justify-content: flex-end; }
+      .uk-btn-cta { flex: none !important; min-width: 220px; }
     }
     .uk-actionbar .summary { flex: 1; display: flex; flex-direction: column; justify-content: center; font-size: 13px; color: var(--uk-muted); min-width: 0; }
     .uk-actionbar .summary strong { color: var(--uk-ink); font-weight: 600; font-size: 14px; }
@@ -234,11 +244,20 @@
     .uk-tag.success { background: var(--uk-success-tint); color: var(--uk-success); }
 
     /* ── Progress: bar ── */
-    .uk-progress-bar { display: flex; flex-direction: column; gap: 8px; padding: 14px 18px 16px; background: var(--uk-white); border-bottom: 1px solid var(--uk-line); }
-    @media (min-width: 768px) { .uk-progress-bar { padding: 24px 48px; } }
+    .uk-progress-bar { display: flex; flex-direction: column; gap: 8px; padding: 12px 18px 14px; background: var(--uk-white); border-bottom: 1px solid var(--uk-line); }
+    @media (min-width: 768px) { .uk-progress-bar { padding: 20px max(48px, calc((100% - 1100px) / 2)) 22px; } }
     .uk-progress-track { height: 4px; background: var(--uk-line); border-radius: var(--r-pill); overflow: hidden; position: relative; }
     .uk-progress-fill { position: absolute; inset: 0 auto 0 0; background: var(--uk-primary); border-radius: var(--r-pill); transition: width 360ms var(--ease); }
-    .uk-progress-labels { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 500; }
+    /* Mobile: compact step label */
+    .uk-progress-mobile-label { display: flex; align-items: center; gap: 8px; }
+    .uk-progress-mobile-label .step-count { font-size: 11px; font-weight: 700; color: var(--uk-muted); letter-spacing: .05em; text-transform: uppercase; background: var(--uk-line-2); border-radius: var(--r-pill); padding: 2px 8px; }
+    .uk-progress-mobile-label .step-name { font-size: 13px; font-weight: 600; color: var(--uk-primary); }
+    /* Desktop: all step buttons */
+    .uk-progress-labels { display: none; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 500; }
+    @media (min-width: 768px) {
+      .uk-progress-mobile-label { display: none; }
+      .uk-progress-labels { display: flex; }
+    }
     .uk-progress-labels button {
       flex: 1; appearance: none; font-family: inherit; font-size: 12px; font-weight: 500;
       letter-spacing: -.005em; line-height: 1.3;
@@ -635,6 +654,10 @@ function ProgressIndicator({ step, onStepClick }) {
   return (
     <div className="uk-progress-bar">
       <div className="uk-progress-track"><div className="uk-progress-fill" style={{ width: fillPct + '%' }} /></div>
+      <div className="uk-progress-mobile-label">
+        <span className="step-count">{step + 1} / {STEPS.length}</span>
+        <span className="step-name">{STEPS[step]}</span>
+      </div>
       <div className="uk-progress-labels">
         {STEPS.map((label, i) => {
           const isDone = i < step;
@@ -939,39 +962,41 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
     <>
       <div className="uk-content" style={{ position: 'relative' }}>
         <AutoSaveTag visible={autoSaving} />
-        <div className="uk-stack uk-stack-3">
-          <h1 className="uk-h1">Add meg az adataid</h1>
-          <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ezekre a foglalás visszaigazolásához és az email kód kiküldéséhez van szükségünk.</p>
+        <div className="uk-col-form">
+          <div className="uk-stack uk-stack-3">
+            <h1 className="uk-h1">Add meg az adataid</h1>
+            <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ezekre a foglalás visszaigazolásához és az email kód kiküldéséhez van szükségünk.</p>
+          </div>
+          <div className="uk-stack uk-stack-4">
+            <div className="uk-field">
+              <label htmlFor="f-name">Teljes név <span className="req">*</span></label>
+              <div className="uk-field-icon-wrap">
+                <span className="icon"><Icon.user /></span>
+                <input id="f-name" className={'uk-input' + (errors.name ? ' has-error' : '')} type="text" value={data.name} onChange={e => upd('name', e.target.value)} placeholder="pl. Nagy Anna" autoComplete="name" />
+              </div>
+              {errors.name && <div className="uk-field-error">{errors.name}</div>}
+            </div>
+            <div className="uk-field">
+              <label htmlFor="f-email">Email cím <span className="req">*</span></label>
+              <div className="uk-field-icon-wrap">
+                <span className="icon"><Icon.mail /></span>
+                <input id="f-email" className={'uk-input' + (errors.email ? ' has-error' : '')} type="email" value={data.email} onChange={e => upd('email', e.target.value)} onBlur={blurEmail} placeholder="pl. nagy.anna@gmail.com" autoComplete="email" />
+              </div>
+              {errors.email ? <div className="uk-field-error">{errors.email}</div> : <div className="uk-field-help">Erre az email-címre küldjük az ellenőrző kódot.</div>}
+            </div>
+            <div className="uk-field">
+              <label htmlFor="f-phone">Telefonszám <span className="req">*</span></label>
+              <div className="uk-field-icon-wrap">
+                <span className="icon"><Icon.phone /></span>
+                <input id="f-phone" className={'uk-input' + (errors.phone ? ' has-error' : '')} type="tel" value={data.phone} onChange={e => upd('phone', e.target.value)} placeholder="+36 30 123 4567" autoComplete="tel" />
+              </div>
+              {errors.phone && <div className="uk-field-error">{errors.phone}</div>}
+            </div>
+          </div>
+          <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az adataid biztonságban kezeljük. A folyamat bármikor megszakítható — adataid mentődnek.</div></div>
         </div>
-        <div className="uk-stack uk-stack-4">
-          <div className="uk-field">
-            <label htmlFor="f-name">Teljes név <span className="req">*</span></label>
-            <div className="uk-field-icon-wrap">
-              <span className="icon"><Icon.user /></span>
-              <input id="f-name" className={'uk-input' + (errors.name ? ' has-error' : '')} type="text" value={data.name} onChange={e => upd('name', e.target.value)} placeholder="pl. Nagy Anna" autoComplete="name" />
-            </div>
-            {errors.name && <div className="uk-field-error">{errors.name}</div>}
-          </div>
-          <div className="uk-field">
-            <label htmlFor="f-email">Email cím <span className="req">*</span></label>
-            <div className="uk-field-icon-wrap">
-              <span className="icon"><Icon.mail /></span>
-              <input id="f-email" className={'uk-input' + (errors.email ? ' has-error' : '')} type="email" value={data.email} onChange={e => upd('email', e.target.value)} onBlur={blurEmail} placeholder="pl. nagy.anna@gmail.com" autoComplete="email" />
-            </div>
-            {errors.email ? <div className="uk-field-error">{errors.email}</div> : <div className="uk-field-help">Erre az email-címre küldjük az ellenőrző kódot.</div>}
-          </div>
-          <div className="uk-field">
-            <label htmlFor="f-phone">Telefonszám <span className="req">*</span></label>
-            <div className="uk-field-icon-wrap">
-              <span className="icon"><Icon.phone /></span>
-              <input id="f-phone" className={'uk-input' + (errors.phone ? ' has-error' : '')} type="tel" value={data.phone} onChange={e => upd('phone', e.target.value)} placeholder="+36 30 123 4567" autoComplete="tel" />
-            </div>
-            {errors.phone && <div className="uk-field-error">{errors.phone}</div>}
-          </div>
-        </div>
-        <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az adataid biztonságban kezeljük. A folyamat bármikor megszakítható — adataid mentődnek.</div></div>
       </div>
-      <ActionBar right={<button className="uk-btn uk-btn-primary" disabled={!valid} onClick={() => { if (validate()) onContinue(); }} style={{ flex: 1 }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
+      <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!valid} onClick={() => { if (validate()) onContinue(); }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
     </>
   );
 }
@@ -1203,6 +1228,7 @@ function SMSScreen({ email, onConfirm, onResend, onBack }) {
 
   return (
     <div className="uk-content">
+      <div className="uk-col-form">
       <div className="uk-stack uk-stack-3">
         <h1 className="uk-h1">Add meg a kódot</h1>
         <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>
@@ -1225,6 +1251,7 @@ function SMSScreen({ email, onConfirm, onResend, onBack }) {
       <div className="uk-stack uk-stack-2" style={{ marginTop: 16, padding: 14, background: 'var(--uk-paper)', border: '1px dashed var(--uk-line)', borderRadius: 'var(--r-md)' }}>
         <div className="uk-caption">DEMÓ</div>
         <div className="uk-small">Bármilyen 6 jegyű kód elfogadott. Hiba szimulálásához: <code style={{ background: 'var(--uk-white)', padding: '1px 6px', borderRadius: 4, fontFamily: 'ui-monospace,monospace' }}>000000</code></div>
+      </div>
       </div>
     </div>
   );
