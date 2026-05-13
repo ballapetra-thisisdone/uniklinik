@@ -1297,7 +1297,7 @@ const SCREEN_TITLES = { data:'Adatok megadása', choice:'Folytatás', doctor:'Or
 const STORAGE_KEY = 'uniklinik-booking-v3';
 
 function loadInitial() {
-  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
+  try { const raw = sessionStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
   return { screen: 'data', history: [], data: { name: '', email: '', phone: '' }, flow: null, doctor: null, treatment: null, slot: null };
 }
 
@@ -1320,7 +1320,7 @@ function BookingApp() {
   const saveTimer = useRef(null);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
     setAutoSaving(true);
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => setAutoSaving(false), 1200);
@@ -1332,7 +1332,7 @@ function BookingApp() {
     return { ...s, screen: s.history[s.history.length - 1], history: s.history.slice(0, -1) };
   }), []);
   const reset = useCallback(() => {
-    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch(e) {}
     setState({ screen: 'data', history: [], data: { name: '', email: '', phone: '' }, flow: null, doctor: null, treatment: null, slot: null });
   }, []);
   const update = useCallback(patch => setState(s => ({ ...s, ...patch })), []);
