@@ -1034,7 +1034,7 @@ function ChoiceScreen({ onPick, onQuick }) {
 }
 
 // Screen 3a: Doctor picker
-function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null }) {
+function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, onSwitch }) {
   const [search, setSearch] = useState('');
   const [specFilter, setSpecFilter] = useState('all');
 
@@ -1055,10 +1055,13 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null }
     <div className="uk-content">
       <div className="uk-stack uk-stack-2">
         <h1 className="uk-h1">{treatment ? 'Válassz orvost' : 'Melyik orvosra van szükséged?'}</h1>
-        {treatment
-          ? <p className="uk-small">Kezelés: <strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong> · {treatment.duration} perc</p>
-          : <p className="uk-small">22 szakorvos közül választhatsz. Keress névre vagy szakterületre.</p>
-        }
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          {treatment
+            ? <p className="uk-small" style={{ margin: 0 }}>Kezelés: <strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong> · {treatment.duration} perc</p>
+            : <p className="uk-small" style={{ margin: 0 }}>22 szakorvos közül választhatsz. Keress névre vagy szakterületre.</p>
+          }
+          {onSwitch && <button onClick={onSwitch} style={{ background: 'none', border: 0, padding: 0, fontSize: 13, color: 'var(--uk-primary)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 }}>Kezelést választok helyette →</button>}
+        </div>
       </div>
       {treatment && (
         <button className="uk-quick-banner" onClick={() => { onSelect(null); onContinue(); }}>
@@ -1082,16 +1085,19 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null }
 }
 
 // Screen 3b: Treatment picker
-function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null }) {
+function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null, onSwitch }) {
   return (
     <>
       <div className="uk-content">
         <div className="uk-stack uk-stack-2">
           <h1 className="uk-h1">{doctor ? 'Milyen kezelésre érkezel?' : 'Milyen kezelést szeretnél?'}</h1>
-          {doctor
-            ? <p className="uk-small">Orvos: <strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong> · {specName(doctor.spec)}</p>
-            : <p className="uk-small">Válassz a kezelések közül — azután mutatjuk a megfelelő orvosokat és időpontokat.</p>
-          }
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            {doctor
+              ? <p className="uk-small" style={{ margin: 0 }}>Orvos: <strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong> · {specName(doctor.spec)}</p>
+              : <p className="uk-small" style={{ margin: 0 }}>Válassz a kezelések közül — azután mutatjuk a megfelelő orvosokat és időpontokat.</p>
+            }
+            {onSwitch && <button onClick={onSwitch} style={{ background: 'none', border: 0, padding: 0, fontSize: 13, color: 'var(--uk-primary)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 }}>Orvost választok helyette →</button>}
+          </div>
         </div>
         <TreatmentSelect value={selected ? selected.id : null} onChange={onSelect} doctor={doctor} autoOpen={true} />
         {!doctor && <div className="uk-notice"><Icon.info className="icon" /><div className="text">Ha nem vagy biztos benne, milyen kezelésre van szükséged, válaszd a <strong>Konzultáció</strong>t — orvosunk a helyszínen ad ajánlást.</div></div>}
@@ -1363,8 +1369,8 @@ function BookingApp() {
           else goTo('choice');
         }} autoSaving={autoSaving} />;
       case 'choice': return <ChoiceScreen onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
-      case 'doctor': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} />;
-      case 'treatment': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first' })} onContinue={() => goTo('doctorAfterTreatment')} />;
+      case 'doctor': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} onSwitch={() => { update({ doctor: null, flow: 'treatment-first' }); goTo('treatment'); }} />;
+      case 'treatment': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first' })} onContinue={() => goTo('doctorAfterTreatment')} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
       case 'doctorAfterTreatment': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d })} onContinue={() => goTo('calendar')} treatment={state.treatment} />;
       case 'treatmentAfterDoctor': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => goTo('calendar')} doctor={state.doctor} />;
       case 'calendar': return <CalendarScreen doctor={state.doctor} treatment={state.treatment} value={state.slot} onSelect={slot => update({ slot })} onContinue={() => goTo('confirm')} />;
