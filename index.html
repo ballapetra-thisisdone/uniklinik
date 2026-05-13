@@ -1104,7 +1104,7 @@ function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null, 
       </div>
       <ActionBar
         summary={selected ? <><span>Választott kezelés</span><strong>{selected.name}</strong></> : null}
-        right={<button className="uk-btn uk-btn-primary" disabled={!selected} onClick={onContinue} style={{ flex: selected ? 'unset' : 1, minWidth: selected ? 140 : 0 }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
+        right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!selected} onClick={onContinue}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
       />
     </>
   );
@@ -1154,7 +1154,7 @@ function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
       </div>
       <ActionBar
         summary={value && value.date && value.time ? <><span>Választott időpont</span><strong>{formatRelative(value.date)} {value.time}</strong></> : null}
-        right={<button className="uk-btn uk-btn-primary" disabled={!value || !value.time} onClick={onContinue} style={{ flex: (!value || !value.time) ? 1 : 'unset', minWidth: 160 }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
+        right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!value || !value.time} onClick={onContinue}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
       />
     </>
   );
@@ -1196,7 +1196,7 @@ function ConfirmScreen({ booking, onEdit, onSendSms }) {
           </div>
         </div>
       </div>
-      <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-block" onClick={onSendSms}>Email kód kérése <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
+      <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-cta" onClick={onSendSms}>Email kód kérése <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
     </>
   );
 }
