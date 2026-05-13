@@ -1053,32 +1053,30 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null }
 
   return (
     <div className="uk-content">
-      <div className="uk-col-form">
-        <div className="uk-stack uk-stack-2">
-          <h1 className="uk-h1">{treatment ? 'Válassz orvost' : 'Melyik orvosra van szükséged?'}</h1>
-          {treatment
-            ? <p className="uk-small">Kezelés: <strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong> · {treatment.duration} perc</p>
-            : <p className="uk-small">22 szakorvos közül választhatsz. Keress névre vagy szakterületre.</p>
-          }
-        </div>
-        {treatment && (
-          <button className="uk-quick-banner" onClick={() => { onSelect(null); onContinue(); }}>
-            <div className="icon"><Icon.bolt /></div>
-            <div className="text"><div className="label">Mindegy, melyik orvos</div><div className="when">Mutasd a legkorábbi szabad időpontot bármelyik szakembernél</div></div>
-            <Icon.arrow className="arrow" />
-          </button>
-        )}
-        <SearchInput value={search} onChange={setSearch} placeholder="Keress orvosra név szerint…" />
-        <div className="uk-row-flex wrap" style={{ gap: 6 }}>
-          {[{ id: 'all', name: 'Mind' }, ...availSpecs].map(s => (
-            <button key={s.id} className="uk-tag" style={{ cursor: 'pointer', border: 0, fontFamily: 'inherit', background: specFilter === s.id ? 'var(--uk-primary)' : 'var(--uk-line-2)', color: specFilter === s.id ? 'var(--uk-white)' : 'var(--uk-ink-2)' }} onClick={() => setSpecFilter(s.id)}>{s.name}</button>
-          ))}
-        </div>
-        {list.length === 0
-          ? <div className="uk-empty"><Icon.search className="icon" style={{ width: 32, height: 32 }} /><div>Nincs találat. Próbálj más keresőszót vagy szűrést.</div></div>
-          : <div className="uk-stack uk-stack-3">{list.map(d => <DoctorRow key={d.id} doctor={d} selected={selected && selected.id === d.id} onClick={() => { onSelect(d); onContinue(); }} />)}</div>
+      <div className="uk-stack uk-stack-2">
+        <h1 className="uk-h1">{treatment ? 'Válassz orvost' : 'Melyik orvosra van szükséged?'}</h1>
+        {treatment
+          ? <p className="uk-small">Kezelés: <strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong> · {treatment.duration} perc</p>
+          : <p className="uk-small">22 szakorvos közül választhatsz. Keress névre vagy szakterületre.</p>
         }
       </div>
+      {treatment && (
+        <button className="uk-quick-banner" onClick={() => { onSelect(null); onContinue(); }}>
+          <div className="icon"><Icon.bolt /></div>
+          <div className="text"><div className="label">Mindegy, melyik orvos</div><div className="when">Mutasd a legkorábbi szabad időpontot bármelyik szakembernél</div></div>
+          <Icon.arrow className="arrow" />
+        </button>
+      )}
+      <SearchInput value={search} onChange={setSearch} placeholder="Keress orvosra név szerint…" />
+      <div className="uk-row-flex wrap" style={{ gap: 6 }}>
+        {[{ id: 'all', name: 'Mind' }, ...availSpecs].map(s => (
+          <button key={s.id} className="uk-tag" style={{ cursor: 'pointer', border: 0, fontFamily: 'inherit', background: specFilter === s.id ? 'var(--uk-primary)' : 'var(--uk-line-2)', color: specFilter === s.id ? 'var(--uk-white)' : 'var(--uk-ink-2)' }} onClick={() => setSpecFilter(s.id)}>{s.name}</button>
+        ))}
+      </div>
+      {list.length === 0
+        ? <div className="uk-empty"><Icon.search className="icon" style={{ width: 32, height: 32 }} /><div>Nincs találat. Próbálj más keresőszót vagy szűrést.</div></div>
+        : <div className="uk-stack uk-stack-3">{list.map(d => <DoctorRow key={d.id} doctor={d} selected={selected && selected.id === d.id} onClick={() => { onSelect(d); onContinue(); }} />)}</div>
+      }
     </div>
   );
 }
@@ -1088,17 +1086,15 @@ function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null }
   return (
     <>
       <div className="uk-content">
-        <div className="uk-col-form">
-          <div className="uk-stack uk-stack-2">
-            <h1 className="uk-h1">{doctor ? 'Milyen kezelésre érkezel?' : 'Milyen kezelést szeretnél?'}</h1>
-            {doctor
-              ? <p className="uk-small">Orvos: <strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong> · {specName(doctor.spec)}</p>
-              : <p className="uk-small">Válassz a kezelések közül — azután mutatjuk a megfelelő orvosokat és időpontokat.</p>
-            }
-          </div>
-          <TreatmentSelect value={selected ? selected.id : null} onChange={onSelect} doctor={doctor} autoOpen={true} />
-          {!doctor && <div className="uk-notice"><Icon.info className="icon" /><div className="text">Ha nem vagy biztos benne, milyen kezelésre van szükséged, válaszd a <strong>Konzultáció</strong>t — orvosunk a helyszínen ad ajánlást.</div></div>}
+        <div className="uk-stack uk-stack-2">
+          <h1 className="uk-h1">{doctor ? 'Milyen kezelésre érkezel?' : 'Milyen kezelést szeretnél?'}</h1>
+          {doctor
+            ? <p className="uk-small">Orvos: <strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong> · {specName(doctor.spec)}</p>
+            : <p className="uk-small">Válassz a kezelések közül — azután mutatjuk a megfelelő orvosokat és időpontokat.</p>
+          }
         </div>
+        <TreatmentSelect value={selected ? selected.id : null} onChange={onSelect} doctor={doctor} autoOpen={true} />
+        {!doctor && <div className="uk-notice"><Icon.info className="icon" /><div className="text">Ha nem vagy biztos benne, milyen kezelésre van szükséged, válaszd a <strong>Konzultáció</strong>t — orvosunk a helyszínen ad ajánlást.</div></div>}
       </div>
       <ActionBar
         summary={selected ? <><span>Választott kezelés</span><strong>{selected.name}</strong></> : null}
