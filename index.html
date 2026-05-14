@@ -1233,31 +1233,31 @@ function SMSScreen({ email, onConfirm, onResend, onBack }) {
   const secs = String(seconds % 60).padStart(2, '0');
 
   return (
-    <div className="uk-content">
-      <div className="uk-col-form">
-      <div className="uk-stack uk-stack-3">
-        <h1 className="uk-h1">Add meg a kódot</h1>
-        <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>
-          6 jegyű kódot küldtünk erre az email-címre:<br/>
-          <strong style={{ color: 'var(--uk-ink)' }}>{email}</strong>
-          <button onClick={onBack} className="uk-link" style={{ background: 'none', border: 0, marginLeft: 8, padding: 0, fontSize: 'inherit' }}>módosítás</button>
-        </p>
-      </div>
-      <div style={{ padding: '16px 0 8px' }}>
-        <SMSCode value={code} onChange={v => { setCode(v); if (error) setError(null); }} length={6} autoFocus />
-      </div>
-      {error && <div className="uk-notice" style={{ background: 'var(--uk-danger-tint)', borderColor: 'var(--uk-danger)', color: 'var(--uk-danger)' }}><Icon.info className="icon" style={{ color: 'var(--uk-danger)' }} /><div className="text">{error}</div></div>}
-      <div className="uk-sms-info"><Icon.clock /><span>Az időpont fenntartva még</span><span className="timer">{mins}:{secs}</span></div>
-      <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--uk-muted)' }}>
-        Nem érkezett meg?{' '}
-        <button className="uk-sms-resend" disabled={resendCountdown > 0} onClick={() => { onResend(); setResendCountdown(60); setFails(0); setError(null); }}>
-          {resendCountdown > 0 ? `Új kód kérése (${resendCountdown}s)` : 'Új kód kérése'}
-        </button>
-      </div>
-      <div className="uk-stack uk-stack-2" style={{ marginTop: 16, padding: 14, background: 'var(--uk-paper)', border: '1px dashed var(--uk-line)', borderRadius: 'var(--r-md)' }}>
-        <div className="uk-caption">DEMÓ</div>
-        <div className="uk-small">Bármilyen 6 jegyű kód elfogadott. Hiba szimulálásához: <code style={{ background: 'var(--uk-white)', padding: '1px 6px', borderRadius: 4, fontFamily: 'ui-monospace,monospace' }}>000000</code></div>
-      </div>
+    <div className="uk-content" style={{ alignItems: 'center', justifyContent: 'center' }}>
+      <div className="uk-col-form" style={{ textAlign: 'center' }}>
+        <div className="uk-stack uk-stack-3">
+          <h1 className="uk-h1">Add meg a kódot</h1>
+          <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>
+            6 jegyű kódot küldtünk erre az email-címre:<br/>
+            <strong style={{ color: 'var(--uk-ink)' }}>{email}</strong>
+            <button onClick={onBack} className="uk-link" style={{ background: 'none', border: 0, marginLeft: 8, padding: 0, fontSize: 'inherit' }}>módosítás</button>
+          </p>
+        </div>
+        <div style={{ padding: '16px 0 8px' }}>
+          <SMSCode value={code} onChange={v => { setCode(v); if (error) setError(null); }} length={6} autoFocus />
+        </div>
+        {error && <div className="uk-notice" style={{ background: 'var(--uk-danger-tint)', borderColor: 'var(--uk-danger)', color: 'var(--uk-danger)', textAlign: 'left' }}><Icon.info className="icon" style={{ color: 'var(--uk-danger)' }} /><div className="text">{error}</div></div>}
+        <div className="uk-sms-info"><Icon.clock /><span>Az időpont fenntartva még</span><span className="timer">{mins}:{secs}</span></div>
+        <div style={{ fontSize: 13, color: 'var(--uk-muted)' }}>
+          Nem érkezett meg?{' '}
+          <button className="uk-sms-resend" disabled={resendCountdown > 0} onClick={() => { onResend(); setResendCountdown(60); setFails(0); setError(null); }}>
+            {resendCountdown > 0 ? `Új kód kérése (${resendCountdown}s)` : 'Új kód kérése'}
+          </button>
+        </div>
+        <div className="uk-stack uk-stack-2" style={{ marginTop: 16, padding: 14, background: 'var(--uk-paper)', border: '1px dashed var(--uk-line)', borderRadius: 'var(--r-md)', textAlign: 'left' }}>
+          <div className="uk-caption">DEMÓ</div>
+          <div className="uk-small">Bármilyen 6 jegyű kód elfogadott. Hiba szimulálásához: <code style={{ background: 'var(--uk-white)', padding: '1px 6px', borderRadius: 4, fontFamily: 'ui-monospace,monospace' }}>000000</code></div>
+        </div>
       </div>
     </div>
   );
