@@ -1383,7 +1383,6 @@ function BookingApp() {
 
   return (
     <div className={'uk-app' + (isDesktop ? ' is-desktop' : '')}>
-      <TopBar title={SCREEN_TITLES[screen]} onBack={goBack} canBack={canBack} isDesktop={isDesktop} />
       {screen !== 'success' && <ProgressIndicator step={stepIndex} onStepClick={handleStepClick} />}
       <div className="uk-body-scroll">
         {renderScreen()}
