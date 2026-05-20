@@ -803,10 +803,9 @@ function DoctorRow({ doctor, selected, onClick }) {
       <div className="uk-avatar lg">{initials(doctor.name)}</div>
       <div className="uk-doctor-body">
         <div className="uk-doctor-name">{doctor.name}</div>
-        <div className="uk-doctor-spec">{specName(doctor.spec)} · {doctor.yrs} év tapasztalat</div>
+        <div className="uk-doctor-spec">{specName(doctor.spec)}</div>
         <div className="uk-doctor-meta">
           {avail && <span className="uk-doctor-avail">{formatRelative(avail.date)} {avail.slot}-tól</span>}
-          <span className="uk-tag muted"><Icon.globe style={{ width: 11, height: 11 }} />{doctor.lang.join(' · ')}</span>
         </div>
       </div>
       <Icon.arrow style={{ color: 'var(--uk-muted)', flexShrink: 0 }} />
