@@ -517,27 +517,27 @@ const DOCTORS = [
 
 const TREATMENT_GROUPS = [
   { id: 'altalanos', name: 'Általános', items: [
-    { id: 't-vizsgalat',   name: 'Általános fogászati vizsgálat',  duration: 30, specs: ['altalanos', 'gyermek'] },
-    { id: 't-fogko',       name: 'Fogkőeltávolítás',               duration: 45, specs: ['altalanos', 'parodont'] },
-    { id: 't-tomes',       name: 'Esztétikus tömés',               duration: 60, specs: ['altalanos', 'esztetikus'] },
-    { id: 't-konzult',     name: 'Konzultáció',                    duration: 30, specs: ['altalanos', 'implant', 'orthodonciai'] },
+    { id: 't-vizsgalat',   name: 'Általános fogászati vizsgálat',  duration: 30, price: '15 000 Ft',  specs: ['altalanos', 'gyermek'] },
+    { id: 't-fogko',       name: 'Fogkőeltávolítás',               duration: 45, price: '25 000 Ft',  specs: ['altalanos', 'parodont'] },
+    { id: 't-tomes',       name: 'Esztétikus tömés',               duration: 60, price: '35 000 Ft',  specs: ['altalanos', 'esztetikus'] },
+    { id: 't-konzult',     name: 'Konzultáció',                    duration: 30, price: 'ingyenes',    specs: ['altalanos', 'implant', 'orthodonciai'] },
   ]},
   { id: 'esztetikai', name: 'Esztétikai kezelések', items: [
-    { id: 't-feheritese',  name: 'Fogfehérítés',                   duration: 90, specs: ['esztetikus'] },
-    { id: 't-hejak',       name: 'Esztétikus héjak',               duration: 75, specs: ['esztetikus'] },
-    { id: 't-korona',      name: 'Korona / híd készítés',          duration: 90, specs: ['esztetikus', 'protetika'] },
+    { id: 't-feheritese',  name: 'Fogfehérítés',                   duration: 90, price: '80 000 Ft',  specs: ['esztetikus'] },
+    { id: 't-hejak',       name: 'Esztétikus héjak',               duration: 75, price: '120 000 Ft', specs: ['esztetikus'] },
+    { id: 't-korona',      name: 'Korona / híd készítés',          duration: 90, price: '150 000 Ft', specs: ['esztetikus', 'protetika'] },
   ]},
   { id: 'sebeszet', name: 'Sebészet & Implantológia', items: [
-    { id: 't-implant-konz',name: 'Implantátum konzultáció',        duration: 45, specs: ['implant'] },
-    { id: 't-implant',     name: 'Implantátum beültetés',          duration: 90, specs: ['implant', 'sebeszet'] },
-    { id: 't-foghuzas',    name: 'Foghúzás',                       duration: 45, specs: ['sebeszet', 'altalanos'] },
-    { id: 't-szajsebeszet',name: 'Szájsebészeti beavatkozás',      duration: 60, specs: ['sebeszet'] },
+    { id: 't-implant-konz',name: 'Implantátum konzultáció',        duration: 45, price: 'ingyenes',    specs: ['implant'] },
+    { id: 't-implant',     name: 'Implantátum beültetés',          duration: 90, price: '350 000 Ft', specs: ['implant', 'sebeszet'] },
+    { id: 't-foghuzas',    name: 'Foghúzás',                       duration: 45, price: '20 000 Ft',  specs: ['sebeszet', 'altalanos'] },
+    { id: 't-szajsebeszet',name: 'Szájsebészeti beavatkozás',      duration: 60, price: '45 000 Ft',  specs: ['sebeszet'] },
   ]},
   { id: 'specialis', name: 'Speciális kezelések', items: [
-    { id: 't-gyokerkez',   name: 'Gyökérkezelés',                  duration: 75, specs: ['endodoncia', 'altalanos'] },
-    { id: 't-parodont',    name: 'Parodontológiai kezelés',        duration: 60, specs: ['parodont'] },
-    { id: 't-orthodoncia', name: 'Fogszabályozás konzultáció',     duration: 45, specs: ['orthodonciai'] },
-    { id: 't-gyermek',     name: 'Gyermekfogászati vizsgálat',     duration: 30, specs: ['gyermek'] },
+    { id: 't-gyokerkez',   name: 'Gyökérkezelés',                  duration: 75, price: '55 000 Ft',  specs: ['endodoncia', 'altalanos'] },
+    { id: 't-parodont',    name: 'Parodontológiai kezelés',        duration: 60, price: '40 000 Ft',  specs: ['parodont'] },
+    { id: 't-orthodoncia', name: 'Fogszabályozás konzultáció',     duration: 45, price: 'ingyenes',    specs: ['orthodonciai'] },
+    { id: 't-gyermek',     name: 'Gyermekfogászati vizsgálat',     duration: 30, price: '15 000 Ft',  specs: ['gyermek'] },
   ]},
 ];
 
@@ -757,7 +757,7 @@ function TreatmentSelect({ value, onChange, doctor = null, autoOpen = false }) {
       <button className="uk-treatment-trigger" onClick={() => setOpen(!open)}>
         <Icon.treatment style={{ color: 'var(--uk-primary)', flexShrink: 0 }} />
         <span className={'label' + (selected ? '' : ' placeholder')}>{selected ? selected.name : 'Válassz kezelést…'}</span>
-        {selected && <span style={{ fontSize: 12, color: 'var(--uk-muted)', marginRight: 8 }}>{selected.duration} perc</span>}
+        {selected && <span style={{ fontSize: 12, color: 'var(--uk-muted)', marginRight: 8 }}>{selected.price}</span>}
         <Icon.chevronDown className="chevron" />
       </button>
       <div className="uk-treatment-list">
@@ -773,7 +773,7 @@ function TreatmentSelect({ value, onChange, doctor = null, autoOpen = false }) {
                 <div key={t.id} className={'uk-treatment-item' + (t.id === value ? ' selected' : '')}
                   onClick={() => { onChange(t); setOpen(false); setSearch(''); }}>
                   <span className="name">{t.name}</span>
-                  <span className="duration">{t.duration} perc</span>
+                  <span className="duration">{t.price}</span>
                 </div>
               ))}
             </div>
@@ -863,7 +863,7 @@ function Calendar({ value, onChange, hasSlotsForDate }) {
 
 // ── Time slots
 function TimeSlots({ slots, value, onChange }) {
-  if (!slots || !slots.length) return <div className="uk-slots-empty">Erre a napra nincs szabad időpont. Válassz másik napot.</div>;
+  if (!slots || !slots.length) return <div className="uk-slots-empty">Erre a napra nincs szabad időpont. Válasszon másik napot.</div>;
   const morning = slots.filter(s => parseInt(s) < 12);
   const afternoon = slots.filter(s => parseInt(s) >= 12);
   const Group = ({ label, items }) => !items.length ? null : (
@@ -947,7 +947,7 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
   const [errors, setErrors] = useState({});
   const validate = () => {
     const e = {};
-    if (!data.name || data.name.trim().length < 2) e.name = 'Add meg a teljes neved';
+    if (!data.name || data.name.trim().length < 2) e.name = 'Adja meg teljes nevét';
     if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) e.email = 'Érvényes email cím szükséges';
     if (!data.phone || data.phone.replace(/\D/g, '').length < 9) e.phone = 'Érvényes telefonszám szükséges';
     setErrors(e);
@@ -966,7 +966,7 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
         <AutoSaveTag visible={autoSaving} />
         <div className="uk-col-form">
           <div className="uk-stack uk-stack-3">
-            <h1 className="uk-h1">Add meg az adataid</h1>
+            <h1 className="uk-h1">Adja meg adatait</h1>
             <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ezekre a foglalás visszaigazolásához és az email kód kiküldéséhez van szükségünk.</p>
           </div>
           <div className="uk-stack uk-stack-4">
@@ -995,7 +995,7 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
               {errors.phone && <div className="uk-field-error">{errors.phone}</div>}
             </div>
           </div>
-          <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az adataid biztonságban kezeljük. A folyamat bármikor megszakítható — adataid mentődnek.</div></div>
+          <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Adatait biztonságban kezeljük. A folyamat bármikor megszakítható — adatai mentődnek.</div></div>
         </div>
       </div>
       <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!valid} onClick={() => { if (validate()) onContinue(); }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
@@ -1009,18 +1009,18 @@ function ChoiceScreen({ onPick, onQuick }) {
   return (
     <div className="uk-content">
       <div className="uk-stack uk-stack-3">
-        <h1 className="uk-h1">Hogyan szeretnéd folytatni?</h1>
-        <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Választhatsz orvost, vagy a kívánt kezelésből kiindulva keresel időpontot.</p>
+        <h1 className="uk-h1">Hogyan szeretné folytatni?</h1>
+        <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Választhat orvost, vagy a kívánt kezelésből kiindulva kereshet időpontot.</p>
       </div>
       <div className="uk-branch">
         <button className="uk-branch-card" onClick={() => onPick('doctor')}>
           <div className="ico"><Icon.doctor /></div>
-          <div className="body"><div className="title">Orvost választok</div><div className="sub">Konkrét szakemberhez foglalnék időpontot. 22 orvos közül választhatsz.</div></div>
+          <div className="body"><div className="title">Orvost választok</div><div className="sub">Konkrét szakemberhez foglalnék időpontot. 22 orvos közül választhat.</div></div>
           <Icon.arrow className="arrow" />
         </button>
         <button className="uk-branch-card" onClick={() => onPick('treatment')}>
           <div className="ico"><Icon.treatment /></div>
-          <div className="body"><div className="title">Kezelést választok</div><div className="sub">Tudom, milyen beavatkozást szeretnék — mutasd a megfelelő orvost és időpontot.</div></div>
+          <div className="body"><div className="title">Kezelést választok</div><div className="sub">Tudom, milyen beavatkozást szeretnék — mutassa a megfelelő orvost és időpontot.</div></div>
           <Icon.arrow className="arrow" />
         </button>
       </div>
@@ -1060,7 +1060,7 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
           {treatment
             ? <p className="uk-small" style={{ margin: 0 }}>Kezelés: <strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong> · {treatment.duration} perc</p>
-            : <p className="uk-small" style={{ margin: 0 }}>22 szakorvos közül választhatsz. Keress névre vagy szakterületre.</p>
+            : <p className="uk-small" style={{ margin: 0 }}>22 szakorvos közül választhat. Keressen névre vagy szakterületre.</p>
           }
           {onSwitch && <button onClick={onSwitch} style={{ background: 'none', border: 0, padding: 0, fontSize: 13, color: 'var(--uk-primary)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 }}>Kezelést választok helyette →</button>}
         </div>
@@ -1068,18 +1068,18 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, 
       {treatment && (
         <button className="uk-quick-banner" onClick={() => { onSelect(null); onContinue(); }}>
           <div className="icon"><Icon.bolt /></div>
-          <div className="text"><div className="label">Mindegy, melyik orvos</div><div className="when">Mutasd a legkorábbi szabad időpontot bármelyik szakembernél</div></div>
+          <div className="text"><div className="label">Mindegy, melyik orvos</div><div className="when">Mutassa a legkorábbi szabad időpontot bármelyik szakembernél</div></div>
           <Icon.arrow className="arrow" />
         </button>
       )}
-      <SearchInput value={search} onChange={setSearch} placeholder="Keress orvosra név szerint…" />
+      <SearchInput value={search} onChange={setSearch} placeholder="Keressen orvosra név szerint…" />
       <div className="uk-row-flex wrap" style={{ gap: 6 }}>
         {[{ id: 'all', name: 'Mind' }, ...availSpecs].map(s => (
           <button key={s.id} className="uk-tag" style={{ cursor: 'pointer', border: 0, fontFamily: 'inherit', background: specFilter === s.id ? 'var(--uk-primary)' : 'var(--uk-line-2)', color: specFilter === s.id ? 'var(--uk-white)' : 'var(--uk-ink-2)' }} onClick={() => setSpecFilter(s.id)}>{s.name}</button>
         ))}
       </div>
       {list.length === 0
-        ? <div className="uk-empty"><Icon.search className="icon" style={{ width: 32, height: 32 }} /><div>Nincs találat. Próbálj más keresőszót vagy szűrést.</div></div>
+        ? <div className="uk-empty"><Icon.search className="icon" style={{ width: 32, height: 32 }} /><div>Nincs találat. Próbáljon más keresőszót vagy szűrést.</div></div>
         : <div className="uk-stack uk-stack-3">{list.map(d => <DoctorRow key={d.id} doctor={d} selected={selected && selected.id === d.id} onClick={() => { onSelect(d); onContinue(); }} />)}</div>
       }
     </div>
@@ -1092,17 +1092,18 @@ function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null, 
     <>
       <div className="uk-content">
         <div className="uk-stack uk-stack-2">
-          <h1 className="uk-h1">{doctor ? 'Milyen kezelésre érkezel?' : 'Milyen kezelést szeretnél?'}</h1>
+          <h1 className="uk-h1">{doctor ? 'Milyen kezelésre érkezik?' : 'Milyen kezelést szeretne?'}</h1>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
             {doctor
               ? <p className="uk-small" style={{ margin: 0 }}>Orvos: <strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong> · {specName(doctor.spec)}</p>
-              : <p className="uk-small" style={{ margin: 0 }}>Válassz a kezelések közül — azután mutatjuk a megfelelő orvosokat és időpontokat.</p>
+              : <p className="uk-small" style={{ margin: 0 }}>Válasszon a kezelések közül — azután mutatjuk a megfelelő orvosokat és időpontokat.</p>
             }
             {onSwitch && <button onClick={onSwitch} style={{ background: 'none', border: 0, padding: 0, fontSize: 13, color: 'var(--uk-primary)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 }}>Orvost választok helyette →</button>}
           </div>
         </div>
         <TreatmentSelect value={selected ? selected.id : null} onChange={onSelect} doctor={doctor} autoOpen={true} />
-        {!doctor && <div className="uk-notice"><Icon.info className="icon" /><div className="text">Ha nem vagy biztos benne, milyen kezelésre van szükséged, válaszd a <strong>Konzultáció</strong>t — orvosunk a helyszínen ad ajánlást.</div></div>}
+        {!doctor && <div className="uk-notice"><Icon.info className="icon" /><div className="text">Ha nem biztos benne, milyen kezelésre van szüksége, válassza a <strong>Konzultáció</strong>t — orvosunk a helyszínen ad ajánlást.</div></div>}
+        {!doctor && <p className="uk-small" style={{ color: 'var(--uk-muted)', margin: 0 }}>Amennyiben a felsoroltak közül nem találja az Ön által preferált kezelést, kérjük vegye fel az ügyfélszolgálatunkkal a kapcsolatot.</p>}
       </div>
       <ActionBar
         summary={selected ? <><span>Választott kezelés</span><strong>{selected.name}</strong></> : null}
@@ -1131,7 +1132,7 @@ function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
     <>
       <div className="uk-content">
         <div className="uk-stack uk-stack-2">
-          <h1 className="uk-h1">Válassz időpontot</h1>
+          <h1 className="uk-h1">Válasszon időpontot</h1>
           <p className="uk-small">
             {doctor && <><strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong></>}
             {doctor && treatment && ' · '}
@@ -1144,7 +1145,7 @@ function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
             <div className="uk-slots-head">
               {value && value.date
                 ? <div><div className="label">{formatRelative(value.date)}</div><div className="day">{formatDateLong(value.date)}</div></div>
-                : <div><div className="label">Válassz napot</div><div className="day" style={{ color: 'var(--uk-muted)', fontWeight: 500 }}>a naptárból</div></div>
+                : <div><div className="label">Válasszon napot</div><div className="day" style={{ color: 'var(--uk-muted)', fontWeight: 500 }}>a naptárból</div></div>
               }
             </div>
             {value && value.date
@@ -1165,18 +1166,19 @@ function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
 // Screen 5: Confirm
 function ConfirmScreen({ booking, onEdit, onSendSms }) {
   const { data, doctor, treatment, slot } = booking;
+  const [accepted, setAccepted] = useState(false);
   return (
     <>
       <div className="uk-content">
         <div className="uk-stack uk-stack-2">
-          <h1 className="uk-h1">Ellenőrizd a foglalást</h1>
+          <h1 className="uk-h1">Ellenőrizze a foglalást</h1>
           <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ha minden adat helyes, emailben küldjük a kódot a véglegesítéshez.</p>
         </div>
         <div className="uk-confirm-layout">
           <div className="uk-summary">
             <div className="uk-summary-row">
               <div className="label">Időpont</div>
-              <div className="value">{formatDateLong(slot.date)}<br/><span style={{ color: 'var(--uk-primary)', fontWeight: 700 }}>{slot.time}</span>{treatment && <span style={{ color: 'var(--uk-muted)', fontWeight: 400 }}> · {treatment.duration} perc</span>}</div>
+              <div className="value">{formatDateLong(slot.date)}<br/><span style={{ color: 'var(--uk-primary)', fontWeight: 700 }}>{slot.time}</span><span style={{ color: 'var(--uk-muted)', fontWeight: 400, fontSize: 13 }}> · érkezés 15 perccel korábban</span></div>
               <button className="edit" onClick={() => onEdit('calendar')}><Icon.pencil /> Mód.</button>
             </div>
             {doctor && <div className="uk-summary-row"><div className="label">Orvos</div><div className="value">{doctor.name}<br/><span style={{ color: 'var(--uk-muted)', fontWeight: 400, fontSize: 13 }}>{specName(doctor.spec)}</span></div><button className="edit" onClick={() => onEdit('doctor')}><Icon.pencil /> Mód.</button></div>}
@@ -1194,11 +1196,21 @@ function ConfirmScreen({ booking, onEdit, onSendSms }) {
                 <div style={{ flex: 1 }}><div className="uk-h3">Email megerősítés</div><div className="uk-small" style={{ marginTop: 2 }}>A következő lépésben kódot küldünk erre az email-címre: <strong style={{ color: 'var(--uk-ink)' }}>{data.email}</strong>.</div></div>
               </div>
             </div>
-            <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az időpontot 5 percre fenntartjuk, amíg megérkezik az email és beilleszted a kódot.</div></div>
+            <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az időpontot 5 percre fenntartjuk, amíg megérkezik az email és beilleszti a kódot.</div></div>
+            <div style={{ background: 'var(--uk-paper)', border: '1.5px solid var(--uk-line)', borderRadius: 'var(--r-lg)', padding: '18px 20px' }}>
+              <div className="uk-stack uk-stack-3">
+                <p className="uk-small" style={{ color: 'var(--uk-ink-2)', lineHeight: 1.6, margin: 0 }}>Kérjük az időpont visszaigazoló e-mail tartalmát figyelmesen olvassa el, mert fontos információkat tartalmaz a kezeléssel kapcsolatban.</p>
+                <p className="uk-small" style={{ color: 'var(--uk-ink-2)', lineHeight: 1.6, margin: 0 }}>Amennyiben időpontját nem, vagy 24 órán belül mondja le, rendelkezésre állási díjat számolunk fel, melynek összege <strong style={{ color: 'var(--uk-ink)' }}>25 000 Ft</strong>.</p>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)} style={{ width: 18, height: 18, accentColor: 'var(--uk-primary)', cursor: 'pointer', flexShrink: 0 }} />
+                  <span className="uk-small" style={{ color: 'var(--uk-ink)', fontWeight: 500 }}>Tudomásul vettem</span>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-cta" onClick={onSendSms}>Email kód kérése <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
+      <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!accepted} onClick={onSendSms}>Email kód kérése <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
     </>
   );
 }
@@ -1223,7 +1235,7 @@ function SMSScreen({ email, onConfirm, onResend, onBack }) {
       setTimeout(() => {
         if (code === '000000') {
           const nf = fails + 1; setFails(nf);
-          setError(nf >= 3 ? '3 sikertelen próba. Új kódot kérünk neked automatikusan.' : `Hibás kód. Próbáld újra. (${nf}/3)`);
+          setError(nf >= 3 ? '3 sikertelen próba. Új kódot küldünk Önnek automatikusan.' : `Hibás kód. Próbálja újra. (${nf}/3)`);
           if (nf >= 3) setResendCountdown(0);
           setCode('');
         } else { onConfirm(); }
@@ -1238,7 +1250,7 @@ function SMSScreen({ email, onConfirm, onResend, onBack }) {
     <div className="uk-content" style={{ alignItems: 'center', justifyContent: 'center' }}>
       <div className="uk-col-form" style={{ textAlign: 'center' }}>
         <div className="uk-stack uk-stack-3">
-          <h1 className="uk-h1">Add meg a kódot</h1>
+          <h1 className="uk-h1">Adja meg a kódot</h1>
           <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>
             6 jegyű kódot küldtünk erre az email-címre:<br/>
             <strong style={{ color: 'var(--uk-ink)' }}>{email}</strong>
@@ -1292,7 +1304,7 @@ function SuccessScreen({ booking, onNew }) {
       </div>
       <div className="uk-notice" style={{ maxWidth: 360, marginTop: 12 }}>
         <Icon.info className="icon" />
-        <div className="text">A megjelenés előtt 24 órával emlékeztető SMS-t küldünk. Ha nem tudsz jönni, az emailben található linkre kattintva tudod lemondani vagy módosítani.</div>
+        <div className="text">A megjelenés előtt 24 órával emlékeztető SMS-t küldünk. Ha nem tud jönni, az emailben található linkre kattintva tudja lemondani vagy módosítani.</div>
       </div>
     </div>
   );
