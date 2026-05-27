@@ -1150,7 +1150,7 @@ function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
             </div>
             {value && value.date
               ? <TimeSlots slots={slotsForDate} value={value.time} onChange={time => onSelect({ ...value, time })} />
-              : <div className="uk-slots-empty">A pontokkal jelölt napokon van szabad időpont. Koppints egy napra.</div>
+              : <div className="uk-slots-empty">A pontokkal jelölt napokon van szabad időpont. Kattintson egy napra.</div>
             }
           </div>
         </div>
