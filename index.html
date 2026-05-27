@@ -249,7 +249,7 @@
     .uk-progress-track { height: 4px; background: var(--uk-line); border-radius: var(--r-pill); overflow: hidden; position: relative; }
     .uk-progress-fill { position: absolute; inset: 0 auto 0 0; background: var(--uk-primary); border-radius: var(--r-pill); transition: width 360ms var(--ease); }
     /* Mobile: compact step label */
-    .uk-progress-mobile-label { display: flex; align-items: center; gap: 8px; }
+    .uk-progress-mobile-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .uk-progress-mobile-label .step-count { font-size: 11px; font-weight: 700; color: var(--uk-muted); letter-spacing: .05em; text-transform: uppercase; background: var(--uk-line-2); border-radius: var(--r-pill); padding: 2px 8px; }
     .uk-progress-mobile-label .step-name { font-size: 13px; font-weight: 600; color: var(--uk-primary); }
     /* Desktop: all step buttons */
@@ -649,14 +649,17 @@ const Icon = {
 
 // ── Progress
 const STEPS = ['Adatok', 'Választás', 'Időpont', 'Megerősítés'];
-function ProgressIndicator({ step, onStepClick }) {
+function ProgressIndicator({ step, onStepClick, onBack, canBack }) {
   const fillPct = ((step + 1) / STEPS.length) * 100;
   return (
     <div className="uk-progress-bar">
       <div className="uk-progress-track"><div className="uk-progress-fill" style={{ width: fillPct + '%' }} /></div>
       <div className="uk-progress-mobile-label">
-        <span className="step-count">{step + 1} / {STEPS.length}</span>
+        {canBack
+          ? <button className="uk-topbar-back" onClick={onBack} aria-label="Vissza" style={{ marginLeft: -6 }}><Icon.back /></button>
+          : <span style={{ width: 30 }} />}
         <span className="step-name">{STEPS[step]}</span>
+        <span style={{ width: 30 }} />
       </div>
       <div className="uk-progress-labels">
         {STEPS.map((label, i) => {
@@ -1376,7 +1379,7 @@ function BookingApp() {
 
   return (
     <div className={'uk-app' + (isDesktop ? ' is-desktop' : '')}>
-      {screen !== 'success' && <ProgressIndicator step={stepIndex} onStepClick={handleStepClick} />}
+      {screen !== 'success' && <ProgressIndicator step={stepIndex} onStepClick={handleStepClick} onBack={goBack} canBack={canBack} />}
       <div className="uk-body-scroll">
         {renderScreen()}
       </div>
