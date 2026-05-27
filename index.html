@@ -1088,8 +1088,8 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, 
               <Icon.calendar style={{ width: 15, height: 15, flexShrink: 0 }} />
               <span>Legkorábbi szabad időpont: <strong style={{ color: 'var(--uk-ink)' }}>{formatDateLong(autoResult.date)}, {autoResult.time}</strong></span>
             </div>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-              <button className="uk-btn uk-btn-primary" style={{ flex: 1 }} onClick={() => { onSelect(autoResult.doctor); onContinue(); }}>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <button className="uk-btn uk-btn-primary" onClick={() => { onSelect(autoResult.doctor); onContinue(); }}>
                 Tovább
               </button>
               <button onClick={() => setAutoResult(null)} style={{ background: 'none', border: 0, padding: '0 4px', fontSize: 13, color: 'var(--uk-muted)', cursor: 'pointer', fontFamily: 'inherit' }}>Mégsem</button>
