@@ -967,7 +967,7 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
         <AutoSaveTag visible={autoSaving} />
         <div className="uk-col-form">
           <div className="uk-stack uk-stack-3">
-            <h1 className="uk-h1">Adja meg adatait</h1>
+            <h1 className="uk-h1">Kérjük, adja meg adatait.</h1>
             <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Ezekre a foglalás visszaigazolásához és az email kód kiküldéséhez van szükségünk.</p>
           </div>
           <div className="uk-stack uk-stack-4">
@@ -1056,6 +1056,7 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, 
   }, [treatment]);
 
   return (
+    <>
     <div className="uk-content">
       <div className="uk-stack uk-stack-2">
         <h1 className="uk-h1">{treatment ? 'Válasszon orvost' : 'Melyik orvosra van szüksége?'}</h1>
@@ -1075,7 +1076,7 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, 
         </button>
       )}
       {autoResult && (
-        <div style={{ background: 'var(--uk-paper)', border: '2px solid var(--uk-primary)', borderRadius: 'var(--r-lg)', padding: '20px 20px 16px' }}>
+        <div style={{ background: 'var(--uk-paper)', border: '2px solid var(--uk-primary)', borderRadius: 'var(--r-lg)', padding: '20px 20px 20px' }}>
           <div className="uk-stack uk-stack-3">
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div className="uk-avatar lg" style={{ background: 'var(--uk-primary-tint)', color: 'var(--uk-primary)', flexShrink: 0 }}>{initials(autoResult.doctor.name)}</div>
@@ -1087,12 +1088,6 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, 
             <div style={{ fontSize: 13, color: 'var(--uk-ink-2)', display: 'flex', alignItems: 'center', gap: 6 }}>
               <Icon.calendar style={{ width: 15, height: 15, flexShrink: 0 }} />
               <span>Legkorábbi szabad időpont: <strong style={{ color: 'var(--uk-ink)' }}>{formatDateLong(autoResult.date)}, {autoResult.time}</strong></span>
-            </div>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <button className="uk-btn uk-btn-primary" style={{ width: 'auto', flexShrink: 0 }} onClick={() => { onSelect(autoResult.doctor); onContinue(); }}>
-                Tovább
-              </button>
-              <button onClick={() => setAutoResult(null)} style={{ background: 'none', border: 0, padding: '0 4px', fontSize: 13, color: 'var(--uk-muted)', cursor: 'pointer', fontFamily: 'inherit' }}>Mégsem</button>
             </div>
           </div>
         </div>
@@ -1112,6 +1107,13 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, 
         </>
       )}
     </div>
+    {autoResult && (
+      <ActionBar
+        left={<button onClick={() => setAutoResult(null)} style={{ background: 'none', border: 0, padding: 0, fontSize: 13, color: 'var(--uk-muted)', cursor: 'pointer', fontFamily: 'inherit' }}>← Mégsem</button>}
+        right={<button className="uk-btn uk-btn-primary uk-btn-cta" onClick={() => { onSelect(autoResult.doctor); onContinue(); }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
+      />
+    )}
+    </>
   );
 }
 
@@ -1225,15 +1227,21 @@ function ConfirmScreen({ booking, onEdit, onSendSms }) {
                 <div style={{ flex: 1 }}><div className="uk-h3">Email megerősítés</div><div className="uk-small" style={{ marginTop: 2 }}>A következő lépésben kódot küldünk erre az email-címre: <strong style={{ color: 'var(--uk-ink)' }}>{data.email}</strong>.</div></div>
               </div>
             </div>
-            <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Az időpontot 5 percre fenntartjuk, amíg megérkezik az email és beilleszti a kódot.</div></div>
             <div style={{ background: 'var(--uk-paper)', border: '1.5px solid var(--uk-line)', borderRadius: 'var(--r-lg)', padding: '18px 20px' }}>
-              <div className="uk-stack uk-stack-3">
-                <p className="uk-small" style={{ color: 'var(--uk-ink-2)', lineHeight: 1.6, margin: 0 }}>Kérjük az időpont visszaigazoló e-mail tartalmát figyelmesen olvassa el, mert fontos információkat tartalmaz a kezeléssel kapcsolatban.</p>
-                <p className="uk-small" style={{ color: 'var(--uk-ink-2)', lineHeight: 1.6, margin: 0 }}>Amennyiben időpontját nem, vagy 24 órán belül mondja le, rendelkezésre állási díjat számolunk fel, melynek összege <strong style={{ color: 'var(--uk-ink)' }}>25 000 Ft</strong>.</p>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)} style={{ width: 18, height: 18, accentColor: 'var(--uk-primary)', cursor: 'pointer', flexShrink: 0 }} />
-                  <span className="uk-small" style={{ color: 'var(--uk-ink)', fontWeight: 500 }}>Tudomásul vettem</span>
-                </label>
+              <div className="uk-stack uk-stack-4">
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <Icon.shield style={{ width: 16, height: 16, color: 'var(--uk-primary)', flexShrink: 0, marginTop: 1 }} />
+                  <p className="uk-small" style={{ color: 'var(--uk-ink-2)', lineHeight: 1.6, margin: 0 }}>Az időpontot 5 percre fenntartjuk, amíg megérkezik az email és beilleszti a kódot.</p>
+                </div>
+                <div style={{ height: 1, background: 'var(--uk-line)' }} />
+                <div className="uk-stack uk-stack-3">
+                  <p className="uk-small" style={{ color: 'var(--uk-ink-2)', lineHeight: 1.6, margin: 0 }}>Kérjük az időpont visszaigazoló e-mail tartalmát figyelmesen olvassa el, mert fontos információkat tartalmaz a kezeléssel kapcsolatban.</p>
+                  <p className="uk-small" style={{ color: 'var(--uk-ink-2)', lineHeight: 1.6, margin: 0 }}>Amennyiben időpontját nem, vagy 24 órán belül mondja le, rendelkezésre állási díjat számolunk fel, melynek összege <strong style={{ color: 'var(--uk-ink)' }}>25 000 Ft</strong>.</p>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)} style={{ width: 18, height: 18, accentColor: 'var(--uk-primary)', cursor: 'pointer', flexShrink: 0 }} />
+                    <span className="uk-small" style={{ color: 'var(--uk-ink)', fontWeight: 500 }}>Tudomásul vettem</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
