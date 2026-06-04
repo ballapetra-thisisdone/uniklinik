@@ -1279,7 +1279,7 @@ function CalendarScreen({ doctor, treatment, slot, onSelect, onContinue }) {
     return [];
   }, [slot, doctor, treatment]);
 
-  const canContinue = !!(slot && slot.time);
+  const canContinue = !!(slot && slot.time && doctor && treatment);
 
   return (
     <>
@@ -1519,12 +1519,12 @@ function BookingApp() {
   const handleEdit = target => {
     if (target === 'calendar') goTo('calendar');
     else if (target === 'doctor') {
-      if (isDesktop) { update({ doctor: null }); goTo('calendar'); }
-      else goTo(state.flow === 'treatment-first' ? 'doctorAfterTreatment' : 'doctor');
+      update({ doctor: null, slot: null });
+      goTo(state.flow === 'treatment-first' ? 'doctorAfterTreatment' : 'doctor');
     }
     else if (target === 'treatment') {
-      if (isDesktop) { update({ treatment: null }); goTo('calendar'); }
-      else goTo(state.flow === 'doctor-first' || state.doctor ? 'treatmentAfterDoctor' : 'treatment');
+      update({ treatment: null, slot: null });
+      goTo(state.flow === 'doctor-first' || state.doctor ? 'treatmentAfterDoctor' : 'treatment');
     }
     else if (target === 'data') goTo('data');
   };
