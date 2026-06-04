@@ -323,6 +323,9 @@
     .uk-branch-card .title { font-weight: 700; font-size: 17px; color: var(--uk-ink); letter-spacing: -.01em; }
     .uk-branch-card .sub { font-size: 13px; color: var(--uk-muted); line-height: 1.4; }
     .uk-branch-card .arrow { color: var(--uk-muted); }
+    .uk-branch-card.selected { border-color: var(--uk-primary); background: var(--uk-primary-tint); }
+    .uk-branch-card.selected .ico { background: var(--uk-primary); color: var(--uk-white); }
+    .uk-branch-card.selected .title, .uk-branch-card.selected .sub { color: var(--uk-ink); }
     @media (min-width: 768px) {
       .uk-branch-card { padding: 28px; }
       .uk-branch-card .ico { width: 56px; height: 56px; }
@@ -368,6 +371,14 @@
       .uk-cal-layout { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
       .uk-calendar { padding: 20px; }
     }
+    /* ── Split layout (ChoiceScreen 2-col) ── */
+    .uk-split-layout { display: flex; flex-direction: column; gap: 0; }
+    @media (min-width: 768px) {
+      .uk-split-layout { display: grid; grid-template-columns: 360px 1fr; gap: 0; align-items: start; }
+      .uk-split-layout .uk-branch { grid-template-columns: 1fr !important; }
+    }
+    .uk-split-right { border-left: 1px solid var(--uk-line); padding-left: 32px; }
+    @media (max-width: 767px) { .uk-split-right { border-left: none; padding-left: 0; border-top: 1px solid var(--uk-line); padding-top: 24px; margin-top: 8px; } }
 
     /* ── Time slots ── */
     .uk-slots-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px; }
@@ -441,6 +452,7 @@
     .uk-treatment-item.selected { background: var(--uk-primary-tint); }
     .uk-treatment-item .name { font-size: 14px; color: var(--uk-ink); font-weight: 500; flex: 1; min-width: 0; letter-spacing: -.005em; }
     .uk-treatment-item .duration { font-size: 12px; color: var(--uk-muted); flex-shrink: 0; }
+    button.uk-treatment-item { appearance: none; border: 0; width: 100%; font-family: inherit; text-align: left; }
     .uk-treatment-search { padding: 10px 12px; border-bottom: 1px solid var(--uk-line); background: var(--uk-paper); }
 
     /* ── Helpers ── */
@@ -1004,34 +1016,129 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
   );
 }
 
+// ── Inline Doctor List (for split layout right panels)
+function InlineDoctorList({ onSelect, treatment = null, selectedId = null }) {
+  const [search, setSearch] = useState('');
+  const list = useMemo(() => {
+    let docs = treatment ? getDoctorsForTreatment(treatment.id) : DOCTORS;
+    if (search) { const q = search.toLowerCase(); docs = docs.filter(d => d.name.toLowerCase().includes(q) || specName(d.spec).toLowerCase().includes(q)); }
+    return docs;
+  }, [search, treatment]);
+  return (
+    <div className="uk-stack uk-stack-4">
+      <div className="uk-stack uk-stack-1">
+        <h2 className="uk-h2">{treatment ? 'Válasszon orvost' : 'Melyik orvosra van szüksége?'}</h2>
+        <p className="uk-small" style={{ color: 'var(--uk-muted)', margin: 0 }}>
+          {treatment ? `Orvosok ehhez: ${treatment.name}` : '22 szakorvos közül választhat.'}
+        </p>
+      </div>
+      <SearchInput value={search} onChange={setSearch} placeholder="Keressen orvosra név szerint…" />
+      {list.length === 0
+        ? <div className="uk-empty"><Icon.search className="icon" style={{ width: 28, height: 28 }} /><div>Nincs találat.</div></div>
+        : <div className="uk-stack uk-stack-3">{list.map(d => <DoctorRow key={d.id} doctor={d} selected={selectedId === d.id} onClick={() => onSelect(d)} />)}</div>
+      }
+    </div>
+  );
+}
+
+// ── Inline Treatment List (for split layout right panels)
+function InlineTreatmentList({ onSelect, doctor = null, selectedId = null }) {
+  const [search, setSearch] = useState('');
+  const groups = useMemo(() => {
+    const docSet = doctor ? new Set(getTreatmentsForDoctor(doctor.id).map(t => t.id)) : null;
+    return TREATMENT_GROUPS.map(g => ({
+      ...g,
+      items: g.items.filter(t => {
+        if (docSet && !docSet.has(t.id)) return false;
+        if (search && !t.name.toLowerCase().includes(search.toLowerCase())) return false;
+        return true;
+      }),
+    })).filter(g => g.items.length > 0);
+  }, [doctor, search]);
+  return (
+    <div className="uk-stack uk-stack-4">
+      <div className="uk-stack uk-stack-1">
+        <h2 className="uk-h2">{doctor ? 'Milyen kezelésre érkezik?' : 'Milyen kezelést szeretne?'}</h2>
+        {doctor
+          ? <p className="uk-small" style={{ color: 'var(--uk-muted)', margin: 0 }}>Orvos: <strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong></p>
+          : <p className="uk-small" style={{ color: 'var(--uk-muted)', margin: 0 }}>Válasszon a kezelések közül — azután mutatjuk a megfelelő orvosokat és időpontokat.</p>
+        }
+      </div>
+      <SearchInput value={search} onChange={setSearch} placeholder="Keresés a kezelések között…" />
+      {groups.map(g => (
+        <div key={g.id}>
+          <div className="uk-treatment-cat">{g.name}</div>
+          {g.items.map(t => (
+            <button key={t.id} className={'uk-treatment-item' + (t.id === selectedId ? ' selected' : '')} onClick={() => onSelect(t)}>
+              <span className="name">{t.name}</span>
+              <span className="duration">{t.price}</span>
+            </button>
+          ))}
+        </div>
+      ))}
+      {!doctor && (
+        <div className="uk-notice"><Icon.info className="icon" /><div className="text">Ha nem biztos benne, milyen kezelésre van szüksége, válassza a <strong>Konzultáció</strong>t — orvosunk a helyszínen ad ajánlást.</div></div>
+      )}
+    </div>
+  );
+}
+
 // Screen 2: Choice
-function ChoiceScreen({ onPick, onQuick }) {
+function ChoiceScreen({ onPick, onPickItem, onQuick }) {
+  const [side, setSide] = useState('doctor');
+  const isDesktop = useIsDesktop();
   const earliest = useMemo(() => findEarliestSlot(), []);
+
+  const handleCardClick = type => {
+    if (isDesktop) setSide(type);
+    else onPick(type);
+  };
+
   return (
     <div className="uk-content">
-      <div className="uk-stack uk-stack-3">
-        <h1 className="uk-h1">Hogyan szeretné folytatni?</h1>
-        <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Választhat orvost, vagy a kívánt kezelésből kiindulva kereshet időpontot.</p>
+      <div className={isDesktop ? 'uk-split-layout' : 'uk-stack uk-stack-5'}>
+        {/* Left panel: choice cards */}
+        <div className="uk-stack uk-stack-5" style={isDesktop ? { paddingRight: 32 } : {}}>
+          <div className="uk-stack uk-stack-3">
+            <h1 className="uk-h1">Hogyan szeretné folytatni?</h1>
+            <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Választhat orvost, vagy a kívánt kezelésből kiindulva kereshet időpontot.</p>
+          </div>
+          <div className="uk-branch">
+            <button className={'uk-branch-card' + (isDesktop && side === 'doctor' ? ' selected' : '')} onClick={() => handleCardClick('doctor')}>
+              <div className="ico"><Icon.doctor /></div>
+              <div className="body">
+                <div className="title">Orvost választok</div>
+                <div className="sub">Konkrét szakemberhez foglalnék időpontot. 22 orvos közül választhat.</div>
+              </div>
+              {!isDesktop && <Icon.arrow className="arrow" />}
+            </button>
+            <button className={'uk-branch-card' + (isDesktop && side === 'treatment' ? ' selected' : '')} onClick={() => handleCardClick('treatment')}>
+              <div className="ico"><Icon.treatment /></div>
+              <div className="body">
+                <div className="title">Kezelést választok</div>
+                <div className="sub">Tudom, milyen beavatkozást szeretnék — mutassa a megfelelő orvost és időpontot.</div>
+              </div>
+              {!isDesktop && <Icon.arrow className="arrow" />}
+            </button>
+          </div>
+          {!isDesktop && earliest && (
+            <button className="uk-quick-banner" onClick={() => onQuick(earliest)}>
+              <div className="icon"><Icon.bolt /></div>
+              <div className="text"><div className="label">Sietős? Foglalj a legközelebbi szabad időpontra</div><div className="when">{formatRelative(earliest.date)} {earliest.time} · {earliest.doctor.name}</div></div>
+              <Icon.arrow className="arrow" />
+            </button>
+          )}
+        </div>
+        {/* Right panel: inline picker (desktop only) */}
+        {isDesktop && (
+          <div className="uk-split-right">
+            {side === 'doctor'
+              ? <InlineDoctorList onSelect={d => onPickItem('doctor', d)} />
+              : <InlineTreatmentList onSelect={t => onPickItem('treatment', t)} />
+            }
+          </div>
+        )}
       </div>
-      <div className="uk-branch">
-        <button className="uk-branch-card" onClick={() => onPick('doctor')}>
-          <div className="ico"><Icon.doctor /></div>
-          <div className="body"><div className="title">Orvost választok</div><div className="sub">Konkrét szakemberhez foglalnék időpontot. 22 orvos közül választhat.</div></div>
-          <Icon.arrow className="arrow" />
-        </button>
-        <button className="uk-branch-card" onClick={() => onPick('treatment')}>
-          <div className="ico"><Icon.treatment /></div>
-          <div className="body"><div className="title">Kezelést választok</div><div className="sub">Tudom, milyen beavatkozást szeretnék — mutassa a megfelelő orvost és időpontot.</div></div>
-          <Icon.arrow className="arrow" />
-        </button>
-      </div>
-      {earliest && (
-        <button className="uk-quick-banner" onClick={() => onQuick(earliest)}>
-          <div className="icon"><Icon.bolt /></div>
-          <div className="text"><div className="label">Sietős? Foglalj a legközelebbi szabad időpontra</div><div className="when">{formatRelative(earliest.date)} {earliest.time} · {earliest.doctor.name}</div></div>
-          <Icon.arrow className="arrow" />
-        </button>
-      )}
     </div>
   );
 }
@@ -1145,7 +1252,20 @@ function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null, 
 }
 
 // Screen 4: Calendar
-function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
+function CalendarScreen({ doctor, treatment, slot, onSelect, onSelectDoctor, onSelectTreatment, onContinue }) {
+  const isDesktop = useIsDesktop();
+
+  // Auto-select first available slot on mount
+  useEffect(() => {
+    if (slot && slot.time) return;
+    for (let offset = 0; offset < 60; offset++) {
+      const d = new Date(); d.setDate(d.getDate() + offset);
+      const ds = d.toISOString().slice(0, 10);
+      const slots = doctor ? getSlotsFor(doctor.id, ds) : (treatment ? getAggregatedSlots(treatment.id, ds) : []);
+      if (slots && slots.length) { onSelect({ date: ds, time: slots[0] }); break; }
+    }
+  }, []);
+
   const hasSlotsForDate = useCallback(ds => {
     if (doctor) return getSlotsFor(doctor.id, ds).length > 0;
     if (treatment) return getAggregatedSlots(treatment.id, ds).length > 0;
@@ -1153,42 +1273,51 @@ function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
   }, [doctor, treatment]);
 
   const slotsForDate = useMemo(() => {
-    if (!value || !value.date) return [];
-    if (doctor) return getSlotsFor(doctor.id, value.date);
-    if (treatment) return getAggregatedSlots(treatment.id, value.date);
+    if (!slot || !slot.date) return [];
+    if (doctor) return getSlotsFor(doctor.id, slot.date);
+    if (treatment) return getAggregatedSlots(treatment.id, slot.date);
     return [];
-  }, [value, doctor, treatment]);
+  }, [slot, doctor, treatment]);
+
+  const canContinue = !!(slot && slot.time && doctor && treatment);
 
   return (
     <>
       <div className="uk-content">
         <div className="uk-stack uk-stack-2">
           <h1 className="uk-h1">Válasszon időpontot</h1>
-          <p className="uk-small">
-            {doctor && <><strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong></>}
+          <p className="uk-small" style={{ color: 'var(--uk-ink-2)' }}>
+            {doctor && <strong style={{ color: 'var(--uk-ink)' }}>Orvos: {doctor.name}</strong>}
             {doctor && treatment && ' · '}
             {treatment && <><strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong> · {treatment.duration} perc</>}
           </p>
         </div>
         <div className="uk-cal-layout">
-          <Calendar value={value && value.date} onChange={date => onSelect({ date, time: null })} hasSlotsForDate={hasSlotsForDate} />
+          <Calendar value={slot && slot.date} onChange={date => onSelect({ date, time: null })} hasSlotsForDate={hasSlotsForDate} />
           <div className="uk-stack uk-stack-4">
             <div className="uk-slots-head">
-              {value && value.date
-                ? <div><div className="label">{formatRelative(value.date)}</div><div className="day">{formatDateLong(value.date)}</div></div>
+              {slot && slot.date
+                ? <div><div className="label">{formatRelative(slot.date)}</div><div className="day">{formatDateLong(slot.date)}</div></div>
                 : <div><div className="label">Válasszon napot</div><div className="day" style={{ color: 'var(--uk-muted)', fontWeight: 500 }}>a naptárból</div></div>
               }
             </div>
-            {value && value.date
-              ? <TimeSlots slots={slotsForDate} value={value.time} onChange={time => onSelect({ ...value, time })} />
+            {slot && slot.date
+              ? <TimeSlots slots={slotsForDate} value={slot.time} onChange={time => onSelect({ ...slot, time })} />
               : <div className="uk-slots-empty">A pontokkal jelölt napokon van szabad időpont. Kattintson egy napra.</div>
             }
+            {/* Secondary picker in right column on desktop */}
+            {isDesktop && doctor && !treatment && onSelectTreatment && (
+              <InlineTreatmentList doctor={doctor} onSelect={onSelectTreatment} selectedId={null} />
+            )}
+            {isDesktop && treatment && !doctor && onSelectDoctor && (
+              <InlineDoctorList treatment={treatment} onSelect={onSelectDoctor} selectedId={null} />
+            )}
           </div>
         </div>
       </div>
       <ActionBar
-        summary={value && value.date && value.time ? <><span>Választott időpont</span><strong>{formatRelative(value.date)} {value.time}</strong></> : null}
-        right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!value || !value.time} onClick={onContinue}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
+        summary={slot && slot.date && slot.time ? <><span>Választott időpont</span><strong>{formatRelative(slot.date)} {slot.time}</strong></> : null}
+        right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!canContinue} onClick={onContinue}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
       />
     </>
   );
@@ -1396,8 +1525,14 @@ function BookingApp() {
 
   const handleEdit = target => {
     if (target === 'calendar') goTo('calendar');
-    else if (target === 'doctor') goTo(state.flow === 'treatment-first' ? 'doctorAfterTreatment' : 'doctor');
-    else if (target === 'treatment') goTo(state.flow === 'doctor-first' || state.doctor ? 'treatmentAfterDoctor' : 'treatment');
+    else if (target === 'doctor') {
+      if (isDesktop) { update({ doctor: null }); goTo('calendar'); }
+      else goTo(state.flow === 'treatment-first' ? 'doctorAfterTreatment' : 'doctor');
+    }
+    else if (target === 'treatment') {
+      if (isDesktop) { update({ treatment: null }); goTo('calendar'); }
+      else goTo(state.flow === 'doctor-first' || state.doctor ? 'treatmentAfterDoctor' : 'treatment');
+    }
     else if (target === 'data') goTo('data');
   };
 
@@ -1413,12 +1548,27 @@ function BookingApp() {
   const renderScreen = () => {
     switch (screen) {
       case 'data': return <DataScreen data={state.data} onChange={data => update({ data })} onContinue={() => goTo('choice')} autoSaving={autoSaving} />;
-      case 'choice': return <ChoiceScreen onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
+      case 'choice': return <ChoiceScreen
+        onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')}
+        onPickItem={(type, item) => {
+          if (type === 'doctor') { update({ doctor: item, treatment: null, flow: 'doctor-first', slot: null }); goTo('calendar'); }
+          else { update({ treatment: item, doctor: null, flow: 'treatment-first', slot: null }); goTo('calendar'); }
+        }}
+        onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))}
+      />;
       case 'doctor': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} onSwitch={() => { update({ doctor: null, flow: 'treatment-first' }); goTo('treatment'); }} />;
       case 'treatment': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first' })} onContinue={() => goTo('doctorAfterTreatment')} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
       case 'doctorAfterTreatment': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d })} onContinue={() => goTo('calendar')} treatment={state.treatment} />;
       case 'treatmentAfterDoctor': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => goTo('calendar')} doctor={state.doctor} />;
-      case 'calendar': return <CalendarScreen doctor={state.doctor} treatment={state.treatment} value={state.slot} onSelect={slot => update({ slot })} onContinue={() => goTo('confirm')} />;
+      case 'calendar': return <CalendarScreen
+        doctor={state.doctor}
+        treatment={state.treatment}
+        slot={state.slot}
+        onSelect={slot => update({ slot })}
+        onSelectDoctor={d => update({ doctor: d })}
+        onSelectTreatment={t => update({ treatment: t })}
+        onContinue={() => goTo('confirm')}
+      />;
       case 'confirm': return <ConfirmScreen booking={state} onEdit={handleEdit} onSendSms={() => goTo('sms')} />;
       case 'sms': return <SMSScreen email={state.data.email} onConfirm={() => goTo('success')} onResend={() => {}} onBack={() => goTo('data')} />;
       case 'success': return <SuccessScreen booking={state} onNew={reset} />;
