@@ -1252,7 +1252,7 @@ function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null, 
 }
 
 // Screen 4: Calendar
-function CalendarScreen({ doctor, treatment, slot, onSelect, onSelectDoctor, onSelectTreatment, onContinue }) {
+function CalendarScreen({ doctor, treatment, slot, onSelect, onContinue }) {
   const isDesktop = useIsDesktop();
 
   // Auto-select first available slot on mount
@@ -1279,7 +1279,7 @@ function CalendarScreen({ doctor, treatment, slot, onSelect, onSelectDoctor, onS
     return [];
   }, [slot, doctor, treatment]);
 
-  const canContinue = !!(slot && slot.time && doctor && treatment);
+  const canContinue = !!(slot && slot.time);
 
   return (
     <>
@@ -1287,9 +1287,9 @@ function CalendarScreen({ doctor, treatment, slot, onSelect, onSelectDoctor, onS
         <div className="uk-stack uk-stack-2">
           <h1 className="uk-h1">Válasszon időpontot</h1>
           <p className="uk-small" style={{ color: 'var(--uk-ink-2)' }}>
-            {doctor && <strong style={{ color: 'var(--uk-ink)' }}>Orvos: {doctor.name}</strong>}
+            {doctor && <strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong>}
             {doctor && treatment && ' · '}
-            {treatment && <><strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong> · {treatment.duration} perc</>}
+            {treatment && <strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong>}
           </p>
         </div>
         <div className="uk-cal-layout">
@@ -1305,13 +1305,6 @@ function CalendarScreen({ doctor, treatment, slot, onSelect, onSelectDoctor, onS
               ? <TimeSlots slots={slotsForDate} value={slot.time} onChange={time => onSelect({ ...slot, time })} />
               : <div className="uk-slots-empty">A pontokkal jelölt napokon van szabad időpont. Kattintson egy napra.</div>
             }
-            {/* Secondary picker — always visible when one side is missing */}
-            {doctor && !treatment && onSelectTreatment && (
-              <InlineTreatmentList doctor={doctor} onSelect={onSelectTreatment} selectedId={null} />
-            )}
-            {treatment && !doctor && onSelectDoctor && (
-              <InlineDoctorList treatment={treatment} onSelect={onSelectDoctor} selectedId={null} />
-            )}
           </div>
         </div>
       </div>
@@ -1551,13 +1544,13 @@ function BookingApp() {
       case 'choice': return <ChoiceScreen
         onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')}
         onPickItem={(type, item) => {
-          if (type === 'doctor') { update({ doctor: item, treatment: null, flow: 'doctor-first', slot: null }); goTo('calendar'); }
-          else { update({ treatment: item, doctor: null, flow: 'treatment-first', slot: null }); goTo('calendar'); }
+          if (type === 'doctor') { update({ doctor: item, treatment: null, slot: null, flow: 'doctor-first' }); goTo('treatmentAfterDoctor'); }
+          else { update({ treatment: item, doctor: null, slot: null, flow: 'treatment-first' }); goTo('doctorAfterTreatment'); }
         }}
         onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))}
       />;
-      case 'doctor': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d, treatment: null, slot: null, flow: 'doctor-first' })} onContinue={() => goTo('calendar')} onSwitch={() => { update({ doctor: null, flow: 'treatment-first' }); goTo('treatment'); }} />;
-      case 'treatment': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t, doctor: null, slot: null, flow: 'treatment-first' })} onContinue={() => goTo('calendar')} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
+      case 'doctor': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d, treatment: null, slot: null, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} onSwitch={() => { update({ doctor: null, flow: 'treatment-first' }); goTo('treatment'); }} />;
+      case 'treatment': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t, doctor: null, slot: null, flow: 'treatment-first' })} onContinue={() => goTo('doctorAfterTreatment')} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
       case 'doctorAfterTreatment': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d })} onContinue={() => goTo('calendar')} treatment={state.treatment} />;
       case 'treatmentAfterDoctor': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => goTo('calendar')} doctor={state.doctor} />;
       case 'calendar': return <CalendarScreen
@@ -1565,8 +1558,6 @@ function BookingApp() {
         treatment={state.treatment}
         slot={state.slot}
         onSelect={slot => update({ slot })}
-        onSelectDoctor={d => update({ doctor: d })}
-        onSelectTreatment={t => update({ treatment: t })}
         onContinue={() => goTo('confirm')}
       />;
       case 'confirm': return <ConfirmScreen booking={state} onEdit={handleEdit} onSendSms={() => goTo('sms')} />;
