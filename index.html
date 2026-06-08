@@ -1173,15 +1173,6 @@ function TreatmentPickerScreen({ selected, onSelect, onContinue, onBack, doctor 
 
 // Screen 4: Calendar
 function CalendarScreen({ doctor, treatment, value, onSelect, onSelectDoctor, onBack, onContinue }) {
-  useEffect(() => {
-    if (value && value.time) return;
-    for (let offset = 0; offset < 60; offset++) {
-      const d = new Date(); d.setDate(d.getDate() + offset);
-      const ds = d.toISOString().slice(0, 10);
-      const slots = doctor ? getSlotsFor(doctor.id, ds) : (treatment ? getAggregatedSlots(treatment.id, ds) : []);
-      if (slots && slots.length) { onSelect({ date: ds, time: slots[0] }); break; }
-    }
-  }, []);
 
   const hasSlotsForDate = useCallback(ds => {
     if (doctor) return getSlotsFor(doctor.id, ds).length > 0;
@@ -1456,6 +1447,16 @@ function BookingApp() {
   }, []);
   const update = useCallback(patch => setState(s => ({ ...s, ...patch })), []);
 
+  const firstSlot = useCallback((doc, treat) => {
+    for (let offset = 0; offset < 60; offset++) {
+      const d = new Date(); d.setDate(d.getDate() + offset);
+      const ds = d.toISOString().slice(0, 10);
+      const slots = doc ? getSlotsFor(doc.id, ds) : (treat ? getAggregatedSlots(treat.id, ds) : []);
+      if (slots && slots.length) return { date: ds, time: slots[0] };
+    }
+    return null;
+  }, []);
+
   const handleEdit = target => {
     if (target === 'calendar') { update({ slot: null }); goTo('calendar'); }
     else if (target === 'doctor') {
@@ -1488,8 +1489,8 @@ function BookingApp() {
     switch (screen) {
       case 'choice': return <ChoiceScreen onBack={canBack ? goBack : null} onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
       case 'doctor': return <DoctorPickerScreen onBack={goBack} selected={state.doctor} onSelect={d => update({ doctor: d, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} onSwitch={() => { update({ doctor: null, flow: 'treatment-first' }); goTo('treatment'); }} />;
-      case 'treatment': return <TreatmentPickerScreen onBack={goBack} selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first', doctor: null })} onContinue={() => goTo('calendar')} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
-      case 'treatmentAfterDoctor': return <TreatmentPickerScreen onBack={goBack} selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => goTo('calendar')} doctor={state.doctor} />;
+      case 'treatment': return <TreatmentPickerScreen onBack={goBack} selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first', doctor: null })} onContinue={() => setState(s => ({ ...s, slot: firstSlot(null, s.treatment), screen: 'calendar', history: [...s.history, s.screen] }))} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
+      case 'treatmentAfterDoctor': return <TreatmentPickerScreen onBack={goBack} selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => setState(s => ({ ...s, slot: firstSlot(s.doctor, s.treatment), screen: 'calendar', history: [...s.history, s.screen] }))} doctor={state.doctor} />;
       case 'calendar': return <CalendarScreen
         onBack={goBack}
         doctor={state.doctor}
