@@ -665,7 +665,7 @@ function getFlowStepIndex(screen, flow) {
   return m[screen] ?? 0;
 }
 
-function ProgressIndicator({ steps, stepIndex }) {
+function ProgressIndicator({ steps, stepIndex, onStepClick }) {
   const fillPct = ((stepIndex + 1) / steps.length) * 100;
   return (
     <div className="uk-progress-bar">
@@ -674,11 +674,22 @@ function ProgressIndicator({ steps, stepIndex }) {
         <span className="step-name">{steps[stepIndex]}</span>
       </div>
       <div className="uk-progress-labels">
-        {steps.map((label, i) => (
-          <button key={i} type="button" className={i < stepIndex ? 'done' : i === stepIndex ? 'active' : ''} disabled={i > stepIndex}>
-            {label}
-          </button>
-        ))}
+        {steps.map((label, i) => {
+          const isDone = i < stepIndex;
+          const isActive = i === stepIndex;
+          return (
+            <button
+              key={i}
+              type="button"
+              className={isDone ? 'done' : isActive ? 'active' : ''}
+              disabled={!isDone && !isActive}
+              onClick={isDone && onStepClick ? () => onStepClick(i) : undefined}
+              title={isDone ? `Vissza: ${label}` : undefined}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -1453,6 +1464,16 @@ function BookingApp() {
   const stepIndex = getFlowStepIndex(screen, state.flow);
   const canBack = state.history.length > 0 && screen !== 'success';
 
+  const STEP_SCREENS = {
+    'doctor-first':    ['choice', 'doctor', 'treatmentAfterDoctor', 'calendar', 'data', 'confirm'],
+    'treatment-first': ['choice', 'treatment', 'calendar', 'data', 'confirm'],
+  };
+  const handleStepClick = useCallback(i => {
+    const screens = STEP_SCREENS[state.flow] || STEP_SCREENS['doctor-first'];
+    const target = screens[i];
+    if (target) goTo(target);
+  }, [state.flow, goTo]);
+
   const renderScreen = () => {
     switch (screen) {
       case 'choice': return <ChoiceScreen onBack={canBack ? goBack : null} onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
@@ -1478,7 +1499,7 @@ function BookingApp() {
 
   return (
     <div className={'uk-app' + (isDesktop ? ' is-desktop' : '')}>
-      {screen !== 'success' && <ProgressIndicator steps={steps} stepIndex={stepIndex} />}
+      {screen !== 'success' && <ProgressIndicator steps={steps} stepIndex={stepIndex} onStepClick={handleStepClick} />}
       <div className="uk-body-scroll">
         {renderScreen()}
       </div>
