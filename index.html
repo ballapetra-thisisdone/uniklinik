@@ -668,28 +668,15 @@ function getFlowStepIndex(screen, flow) {
   return m[screen] ?? 0;
 }
 
-function ProgressIndicator({ steps, stepIndex, onBack, canBack }) {
+function ProgressIndicator({ steps, stepIndex }) {
   const fillPct = ((stepIndex + 1) / steps.length) * 100;
   return (
     <div className="uk-progress-bar">
       <div className="uk-progress-track"><div className="uk-progress-fill" style={{ width: fillPct + '%' }} /></div>
       <div className="uk-progress-mobile-label">
-        {canBack
-          ? <button className="uk-topbar-back" onClick={onBack} aria-label="Vissza" style={{ marginLeft: -6 }}><Icon.back /></button>
-          : <span style={{ width: 30 }} />}
         <span className="step-name">{steps[stepIndex]}</span>
-        <span style={{ width: 30 }} />
       </div>
       <div className="uk-progress-labels">
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={!canBack}
-          aria-label="Vissza"
-          style={{ flex: 'none', width: 32, height: 32, borderRadius: 8, border: canBack ? '1px solid var(--uk-line)' : '1px solid transparent', background: 'none', cursor: canBack ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', color: canBack ? 'var(--uk-ink-2)' : 'transparent', marginRight: 4, padding: 0 }}
-        >
-          <Icon.back style={{ width: 18, height: 18 }} />
-        </button>
         {steps.map((label, i) => (
           <button key={i} type="button" className={i < stepIndex ? 'done' : i === stepIndex ? 'active' : ''} disabled={i > stepIndex}>
             {label}
@@ -697,6 +684,15 @@ function ProgressIndicator({ steps, stepIndex, onBack, canBack }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function BackButton({ onBack }) {
+  if (!onBack) return null;
+  return (
+    <button className="uk-btn uk-btn-ghost" onClick={onBack} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <Icon.back style={{ width: 18, height: 18 }} /> Vissza
+    </button>
   );
 }
 
@@ -962,7 +958,7 @@ function AutoSaveTag({ visible }) {
 // ════════════════════════════════════ SCREENS ════════════════════════════════════
 
 // Screen 1: Data
-function DataScreen({ data, onChange, onContinue, autoSaving }) {
+function DataScreen({ data, onChange, onContinue, onBack, autoSaving }) {
   const [errors, setErrors] = useState({});
   const validate = () => {
     const e = {};
@@ -1017,13 +1013,13 @@ function DataScreen({ data, onChange, onContinue, autoSaving }) {
           <div className="uk-notice"><Icon.shield className="icon" /><div className="text">Adatait biztonságban kezeljük. A folyamat bármikor megszakítható — adatai mentődnek.</div></div>
         </div>
       </div>
-      <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!valid} onClick={() => { if (validate()) onContinue(); }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
+      <ActionBar left={<BackButton onBack={onBack} />} right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!valid} onClick={() => { if (validate()) onContinue(); }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
     </>
   );
 }
 
 // Screen 2: Choice
-function ChoiceScreen({ onPick, onQuick }) {
+function ChoiceScreen({ onPick, onQuick, onBack }) {
   const earliest = useMemo(() => findEarliestSlot(), []);
   return (
     <div className="uk-content">
@@ -1051,11 +1047,12 @@ function ChoiceScreen({ onPick, onQuick }) {
         </button>
       )}
     </div>
+    <ActionBar left={<BackButton onBack={onBack} />} />
   );
 }
 
 // Screen 3a: Doctor picker
-function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, onSwitch }) {
+function DoctorPickerScreen({ selected, onSelect, onContinue, onBack, treatment = null, onSwitch }) {
   const [search, setSearch] = useState('');
   const [specFilter, setSpecFilter] = useState('all');
   const [autoResult, setAutoResult] = useState(null);
@@ -1125,18 +1122,19 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, 
         </>
       )}
     </div>
-    {autoResult && (
-      <ActionBar
-        left={<button className="uk-btn uk-btn-ghost" onClick={() => setAutoResult(null)}><Icon.back style={{ width: 16, height: 16, marginRight: 2 }} /> Mégsem</button>}
-        right={<button className="uk-btn uk-btn-primary uk-btn-cta" onClick={() => { onSelect(autoResult.doctor); onContinue(); }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
-      />
-    )}
+    {autoResult
+      ? <ActionBar
+          left={<button className="uk-btn uk-btn-ghost" onClick={() => setAutoResult(null)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon.back style={{ width: 16, height: 16 }} /> Mégsem</button>}
+          right={<button className="uk-btn uk-btn-primary uk-btn-cta" onClick={() => { onSelect(autoResult.doctor); onContinue(); }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
+        />
+      : <ActionBar left={<BackButton onBack={onBack} />} />
+    }
     </>
   );
 }
 
 // Screen 3b: Treatment picker
-function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null, onSwitch }) {
+function TreatmentPickerScreen({ selected, onSelect, onContinue, onBack, doctor = null, onSwitch }) {
   return (
     <>
       <div className="uk-content">
@@ -1155,6 +1153,7 @@ function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null, 
         {!doctor && <p className="uk-small" style={{ color: 'var(--uk-muted)', margin: 0 }}>Amennyiben a felsoroltak közül nem találja az Ön által preferált kezelést, kérjük vegye fel az ügyfélszolgálatunkkal a kapcsolatot.</p>}
       </div>
       <ActionBar
+        left={<BackButton onBack={onBack} />}
         summary={selected ? <><span>Választott kezelés</span><strong>{selected.name}</strong></> : null}
         right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!selected} onClick={onContinue}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
       />
@@ -1163,7 +1162,7 @@ function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null, 
 }
 
 // Screen 4: Calendar
-function CalendarScreen({ doctor, treatment, value, onSelect, onSelectDoctor, onContinue }) {
+function CalendarScreen({ doctor, treatment, value, onSelect, onSelectDoctor, onBack, onContinue }) {
   const hasSlotsForDate = useCallback(ds => {
     if (doctor) return getSlotsFor(doctor.id, ds).length > 0;
     if (treatment) return getAggregatedSlots(treatment.id, ds).length > 0;
@@ -1228,6 +1227,7 @@ function CalendarScreen({ doctor, treatment, value, onSelect, onSelectDoctor, on
         )}
       </div>
       <ActionBar
+        left={<BackButton onBack={onBack} />}
         summary={value && value.date && value.time
           ? <><span>Választott időpont</span><strong>{formatRelative(value.date)} {value.time}</strong></>
           : null}
@@ -1238,7 +1238,7 @@ function CalendarScreen({ doctor, treatment, value, onSelect, onSelectDoctor, on
 }
 
 // Screen 5: Confirm
-function ConfirmScreen({ booking, onEdit, onSendSms }) {
+function ConfirmScreen({ booking, onEdit, onBack, onSendSms }) {
   const { data, doctor, treatment, slot } = booking;
   const [accepted, setAccepted] = useState(false);
   return (
@@ -1290,7 +1290,7 @@ function ConfirmScreen({ booking, onEdit, onSendSms }) {
           </div>
         </div>
       </div>
-      <ActionBar right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!accepted} onClick={onSendSms}>Email kód kérése <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
+      <ActionBar left={<BackButton onBack={onBack} />} right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!accepted} onClick={onSendSms}>Email kód kérése <Icon.arrow style={{ marginLeft: 4 }} /></button>} />
     </>
   );
 }
@@ -1456,11 +1456,12 @@ function BookingApp() {
 
   const renderScreen = () => {
     switch (screen) {
-      case 'choice': return <ChoiceScreen onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
-      case 'doctor': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} onSwitch={() => { update({ doctor: null, flow: 'treatment-first' }); goTo('treatment'); }} />;
-      case 'treatment': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first', doctor: null })} onContinue={() => goTo('calendar')} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
-      case 'treatmentAfterDoctor': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => goTo('calendar')} doctor={state.doctor} />;
+      case 'choice': return <ChoiceScreen onBack={canBack ? goBack : null} onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
+      case 'doctor': return <DoctorPickerScreen onBack={goBack} selected={state.doctor} onSelect={d => update({ doctor: d, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} onSwitch={() => { update({ doctor: null, flow: 'treatment-first' }); goTo('treatment'); }} />;
+      case 'treatment': return <TreatmentPickerScreen onBack={goBack} selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first', doctor: null })} onContinue={() => goTo('calendar')} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
+      case 'treatmentAfterDoctor': return <TreatmentPickerScreen onBack={goBack} selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => goTo('calendar')} doctor={state.doctor} />;
       case 'calendar': return <CalendarScreen
+        onBack={goBack}
         doctor={state.doctor}
         treatment={state.treatment}
         value={state.slot}
@@ -1468,8 +1469,8 @@ function BookingApp() {
         onSelectDoctor={state.flow === 'treatment-first' ? d => update({ doctor: d }) : null}
         onContinue={() => goTo('data')}
       />;
-      case 'data': return <DataScreen data={state.data} onChange={data => update({ data })} onContinue={() => goTo('confirm')} autoSaving={autoSaving} />;
-      case 'confirm': return <ConfirmScreen booking={state} onEdit={handleEdit} onSendSms={() => goTo('sms')} />;
+      case 'data': return <DataScreen onBack={goBack} data={state.data} onChange={data => update({ data })} onContinue={() => goTo('confirm')} autoSaving={autoSaving} />;
+      case 'confirm': return <ConfirmScreen onBack={goBack} booking={state} onEdit={handleEdit} onSendSms={() => goTo('sms')} />;
       case 'sms': return <SMSScreen email={state.data.email} onConfirm={() => goTo('success')} onResend={() => {}} onBack={() => goTo('data')} />;
       case 'success': return <SuccessScreen booking={state} onNew={reset} />;
       default: return null;
@@ -1478,7 +1479,7 @@ function BookingApp() {
 
   return (
     <div className={'uk-app' + (isDesktop ? ' is-desktop' : '')}>
-      {screen !== 'success' && <ProgressIndicator steps={steps} stepIndex={stepIndex} onBack={goBack} canBack={canBack} />}
+      {screen !== 'success' && <ProgressIndicator steps={steps} stepIndex={stepIndex} />}
       <div className="uk-body-scroll">
         {renderScreen()}
       </div>
