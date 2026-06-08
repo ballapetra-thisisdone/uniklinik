@@ -1022,32 +1022,34 @@ function DataScreen({ data, onChange, onContinue, onBack, autoSaving }) {
 function ChoiceScreen({ onPick, onQuick, onBack }) {
   const earliest = useMemo(() => findEarliestSlot(), []);
   return (
-    <div className="uk-content">
-      <div className="uk-stack uk-stack-3">
-        <h1 className="uk-h1">Foglaljon időpontot online</h1>
-        <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Válasszon orvost, vagy a kívánt kezelésből kiindulva keresünk megfelelő időpontot.</p>
+    <>
+      <div className="uk-content">
+        <div className="uk-stack uk-stack-3">
+          <h1 className="uk-h1">Foglaljon időpontot online</h1>
+          <p className="uk-body" style={{ color: 'var(--uk-ink-2)' }}>Válasszon orvost, vagy a kívánt kezelésből kiindulva keresünk megfelelő időpontot.</p>
+        </div>
+        <div className="uk-branch">
+          <button className="uk-branch-card" onClick={() => onPick('doctor')}>
+            <div className="ico"><Icon.doctor /></div>
+            <div className="body"><div className="title">Orvost választok</div><div className="sub">Konkrét szakemberhez foglalnék időpontot. 22 orvos közül választhat.</div></div>
+            <Icon.arrow className="arrow" />
+          </button>
+          <button className="uk-branch-card" onClick={() => onPick('treatment')}>
+            <div className="ico"><Icon.treatment /></div>
+            <div className="body"><div className="title">Kezelést választok</div><div className="sub">Tudom, milyen beavatkozást szeretnék — mutassa a megfelelő orvost és időpontot.</div></div>
+            <Icon.arrow className="arrow" />
+          </button>
+        </div>
+        {earliest && (
+          <button className="uk-quick-banner" onClick={() => onQuick(earliest)}>
+            <div className="icon"><Icon.bolt /></div>
+            <div className="text"><div className="label">Sietős? Foglalj a legközelebbi szabad időpontra</div><div className="when">{formatRelative(earliest.date)} {earliest.time} · {earliest.doctor.name}</div></div>
+            <Icon.arrow className="arrow" />
+          </button>
+        )}
       </div>
-      <div className="uk-branch">
-        <button className="uk-branch-card" onClick={() => onPick('doctor')}>
-          <div className="ico"><Icon.doctor /></div>
-          <div className="body"><div className="title">Orvost választok</div><div className="sub">Konkrét szakemberhez foglalnék időpontot. 22 orvos közül választhat.</div></div>
-          <Icon.arrow className="arrow" />
-        </button>
-        <button className="uk-branch-card" onClick={() => onPick('treatment')}>
-          <div className="ico"><Icon.treatment /></div>
-          <div className="body"><div className="title">Kezelést választok</div><div className="sub">Tudom, milyen beavatkozást szeretnék — mutassa a megfelelő orvost és időpontot.</div></div>
-          <Icon.arrow className="arrow" />
-        </button>
-      </div>
-      {earliest && (
-        <button className="uk-quick-banner" onClick={() => onQuick(earliest)}>
-          <div className="icon"><Icon.bolt /></div>
-          <div className="text"><div className="label">Sietős? Foglalj a legközelebbi szabad időpontra</div><div className="when">{formatRelative(earliest.date)} {earliest.time} · {earliest.doctor.name}</div></div>
-          <Icon.arrow className="arrow" />
-        </button>
-      )}
-    </div>
-    <ActionBar left={<BackButton onBack={onBack} />} />
+      <ActionBar left={<BackButton onBack={onBack} />} />
+    </>
   );
 }
 
