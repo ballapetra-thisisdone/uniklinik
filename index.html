@@ -1173,6 +1173,16 @@ function TreatmentPickerScreen({ selected, onSelect, onContinue, onBack, doctor 
 
 // Screen 4: Calendar
 function CalendarScreen({ doctor, treatment, value, onSelect, onSelectDoctor, onBack, onContinue }) {
+  useEffect(() => {
+    if (value && value.time) return;
+    for (let offset = 0; offset < 60; offset++) {
+      const d = new Date(); d.setDate(d.getDate() + offset);
+      const ds = d.toISOString().slice(0, 10);
+      const slots = doctor ? getSlotsFor(doctor.id, ds) : (treatment ? getAggregatedSlots(treatment.id, ds) : []);
+      if (slots && slots.length) { onSelect({ date: ds, time: slots[0] }); break; }
+    }
+  }, []);
+
   const hasSlotsForDate = useCallback(ds => {
     if (doctor) return getSlotsFor(doctor.id, ds).length > 0;
     if (treatment) return getAggregatedSlots(treatment.id, ds).length > 0;
