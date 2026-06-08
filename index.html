@@ -650,21 +650,18 @@ const Icon = {
 
 // ── Progress
 function getFlowSteps(flow) {
-  if (flow === 'doctor-first')    return ['Orvos', 'Kezelés', 'Időpont', 'Adatok', 'Megerősítés'];
-  if (flow === 'treatment-first') return ['Kezelés', 'Időpont', 'Adatok', 'Megerősítés'];
-  return ['Választás', 'Időpont', 'Adatok', 'Megerősítés'];
+  if (flow === 'treatment-first') return ['Választás', 'Kezelés', 'Időpont', 'Adatok', 'Megerősítés'];
+  // doctor-first vagy még nincs flow (default: teljes útvonal)
+  return ['Választás', 'Orvos', 'Kezelés', 'Időpont', 'Adatok', 'Megerősítés'];
 }
 
 function getFlowStepIndex(screen, flow) {
-  if (flow === 'doctor-first') {
-    const m = { choice:0, doctor:0, treatmentAfterDoctor:1, calendar:2, data:3, confirm:4, sms:4, success:4 };
-    return m[screen] ?? 0;
-  }
   if (flow === 'treatment-first') {
-    const m = { choice:0, treatment:0, calendar:1, data:2, confirm:3, sms:3, success:3 };
+    const m = { choice:0, treatment:1, calendar:2, data:3, confirm:4, sms:4, success:4 };
     return m[screen] ?? 0;
   }
-  const m = { choice:0, calendar:1, data:2, confirm:3, sms:3, success:3 };
+  // doctor-first vagy még nincs flow
+  const m = { choice:0, doctor:1, treatmentAfterDoctor:2, calendar:3, data:4, confirm:5, sms:5, success:5 };
   return m[screen] ?? 0;
 }
 
