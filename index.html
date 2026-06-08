@@ -649,9 +649,27 @@ const Icon = {
 };
 
 // ── Progress
-const STEPS = ['Adatok', 'Választás', 'Időpont', 'Megerősítés'];
-function ProgressIndicator({ step, onStepClick, onBack, canBack }) {
-  const fillPct = ((step + 1) / STEPS.length) * 100;
+function getFlowSteps(flow) {
+  if (flow === 'doctor-first')    return ['Orvos', 'Kezelés', 'Időpont', 'Adatok', 'Megerősítés'];
+  if (flow === 'treatment-first') return ['Kezelés', 'Időpont', 'Adatok', 'Megerősítés'];
+  return ['Választás', 'Időpont', 'Adatok', 'Megerősítés'];
+}
+
+function getFlowStepIndex(screen, flow) {
+  if (flow === 'doctor-first') {
+    const m = { choice:0, doctor:0, treatmentAfterDoctor:1, calendar:2, data:3, confirm:4, sms:4, success:4 };
+    return m[screen] ?? 0;
+  }
+  if (flow === 'treatment-first') {
+    const m = { choice:0, treatment:0, calendar:1, data:2, confirm:3, sms:3, success:3 };
+    return m[screen] ?? 0;
+  }
+  const m = { choice:0, calendar:1, data:2, confirm:3, sms:3, success:3 };
+  return m[screen] ?? 0;
+}
+
+function ProgressIndicator({ steps, stepIndex, onBack, canBack }) {
+  const fillPct = ((stepIndex + 1) / steps.length) * 100;
   return (
     <div className="uk-progress-bar">
       <div className="uk-progress-track"><div className="uk-progress-fill" style={{ width: fillPct + '%' }} /></div>
@@ -659,24 +677,24 @@ function ProgressIndicator({ step, onStepClick, onBack, canBack }) {
         {canBack
           ? <button className="uk-topbar-back" onClick={onBack} aria-label="Vissza" style={{ marginLeft: -6 }}><Icon.back /></button>
           : <span style={{ width: 30 }} />}
-        <span className="step-name">{STEPS[step]}</span>
+        <span className="step-name">{steps[stepIndex]}</span>
         <span style={{ width: 30 }} />
       </div>
       <div className="uk-progress-labels">
-        {STEPS.map((label, i) => {
-          const isDone = i < step;
-          const isActive = i === step;
-          return (
-            <button
-              key={i}
-              type="button"
-              className={isDone ? 'done' : isActive ? 'active' : ''}
-              onClick={isDone && onStepClick ? () => onStepClick(i) : undefined}
-              disabled={!isDone}
-              title={isDone ? `Vissza: ${label}` : undefined}
-            >{label}</button>
-          );
-        })}
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={!canBack}
+          aria-label="Vissza"
+          style={{ flex: 'none', width: 32, height: 32, borderRadius: 8, border: canBack ? '1px solid var(--uk-line)' : '1px solid transparent', background: 'none', cursor: canBack ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', color: canBack ? 'var(--uk-ink-2)' : 'transparent', marginRight: 4, padding: 0 }}
+        >
+          <Icon.back style={{ width: 18, height: 18 }} />
+        </button>
+        {steps.map((label, i) => (
+          <button key={i} type="button" className={i < stepIndex ? 'done' : i === stepIndex ? 'active' : ''} disabled={i > stepIndex}>
+            {label}
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -1109,7 +1127,7 @@ function DoctorPickerScreen({ selected, onSelect, onContinue, treatment = null, 
     </div>
     {autoResult && (
       <ActionBar
-        left={<button onClick={() => setAutoResult(null)} style={{ background: 'none', border: 0, padding: 0, fontSize: 13, color: 'var(--uk-muted)', cursor: 'pointer', fontFamily: 'inherit' }}>← Mégsem</button>}
+        left={<button className="uk-btn uk-btn-ghost" onClick={() => setAutoResult(null)}><Icon.back style={{ width: 16, height: 16, marginRight: 2 }} /> Mégsem</button>}
         right={<button className="uk-btn uk-btn-primary uk-btn-cta" onClick={() => { onSelect(autoResult.doctor); onContinue(); }}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
       />
     )}
@@ -1145,7 +1163,7 @@ function TreatmentPickerScreen({ selected, onSelect, onContinue, doctor = null, 
 }
 
 // Screen 4: Calendar
-function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
+function CalendarScreen({ doctor, treatment, value, onSelect, onSelectDoctor, onContinue }) {
   const hasSlotsForDate = useCallback(ds => {
     if (doctor) return getSlotsFor(doctor.id, ds).length > 0;
     if (treatment) return getAggregatedSlots(treatment.id, ds).length > 0;
@@ -1159,13 +1177,19 @@ function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
     return [];
   }, [value, doctor, treatment]);
 
+  const doctorList = useMemo(() =>
+    onSelectDoctor ? (treatment ? getDoctorsForTreatment(treatment.id) : DOCTORS) : [],
+  [onSelectDoctor, treatment]);
+
+  const canContinue = !!(value && value.time && (!onSelectDoctor || doctor));
+
   return (
     <>
       <div className="uk-content">
         <div className="uk-stack uk-stack-2">
           <h1 className="uk-h1">Válasszon időpontot</h1>
           <p className="uk-small">
-            {doctor && <><strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong></>}
+            {doctor && <strong style={{ color: 'var(--uk-ink)' }}>{doctor.name}</strong>}
             {doctor && treatment && ' · '}
             {treatment && <><strong style={{ color: 'var(--uk-ink)' }}>{treatment.name}</strong> · {treatment.duration} perc</>}
           </p>
@@ -1185,10 +1209,29 @@ function CalendarScreen({ doctor, treatment, value, onSelect, onContinue }) {
             }
           </div>
         </div>
+        {onSelectDoctor && (
+          <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid var(--uk-line)' }}>
+            <div className="uk-stack uk-stack-4">
+              <div className="uk-stack uk-stack-1">
+                <h2 className="uk-h2">Válasszon orvost</h2>
+                <p className="uk-small" style={{ color: 'var(--uk-muted)', margin: 0 }}>
+                  {doctorList.length} orvos végzi ezt a kezelést — válasszon egyet
+                </p>
+              </div>
+              <div className="uk-stack uk-stack-3">
+                {doctorList.map(d => (
+                  <DoctorRow key={d.id} doctor={d} selected={doctor && doctor.id === d.id} onClick={() => onSelectDoctor(d)} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <ActionBar
-        summary={value && value.date && value.time ? <><span>Választott időpont</span><strong>{formatRelative(value.date)} {value.time}</strong></> : null}
-        right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!value || !value.time} onClick={onContinue}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
+        summary={value && value.date && value.time
+          ? <><span>Választott időpont</span><strong>{formatRelative(value.date)} {value.time}</strong></>
+          : null}
+        right={<button className="uk-btn uk-btn-primary uk-btn-cta" disabled={!canContinue} onClick={onContinue}>Tovább <Icon.arrow style={{ marginLeft: 4 }} /></button>}
       />
     </>
   );
@@ -1349,13 +1392,12 @@ function SuccessScreen({ booking, onNew }) {
 
 // ════════════════════════════════════ APP ════════════════════════════════════
 
-const PROGRESS_STEP_OF = { data:0, choice:1, doctor:1, treatment:1, doctorAfterTreatment:1, treatmentAfterDoctor:1, calendar:2, confirm:3, sms:3, success:3 };
-const SCREEN_TITLES = { data:'Adatok megadása', choice:'Folytatás', doctor:'Orvos választás', treatment:'Kezelés választás', doctorAfterTreatment:'Orvos választás', treatmentAfterDoctor:'Kezelés választás', calendar:'Időpont választás', confirm:'Megerősítés', sms:'Email hitelesítés', success:'Kész' };
+const SCREEN_TITLES = { choice:'Választás', doctor:'Orvos választás', treatment:'Kezelés választás', treatmentAfterDoctor:'Kezelés választás', calendar:'Időpont választás', data:'Adatok', confirm:'Megerősítés', sms:'Email hitelesítés', success:'Kész' };
 const STORAGE_KEY = 'uniklinik-booking-v3';
 
 function loadInitial() {
   try { const raw = sessionStorage.getItem(STORAGE_KEY); if (raw) return JSON.parse(raw); } catch(e) {}
-  return { screen: 'data', history: [], data: { name: '', email: '', phone: '' }, flow: null, doctor: null, treatment: null, slot: null };
+  return { screen: 'choice', history: [], data: { name: '', email: '', phone: '' }, flow: null, doctor: null, treatment: null, slot: null };
 }
 
 function useIsDesktop() {
@@ -1390,35 +1432,43 @@ function BookingApp() {
   }), []);
   const reset = useCallback(() => {
     try { sessionStorage.removeItem(STORAGE_KEY); } catch(e) {}
-    setState({ screen: 'data', history: [], data: { name: '', email: '', phone: '' }, flow: null, doctor: null, treatment: null, slot: null });
+    setState({ screen: 'choice', history: [], data: { name: '', email: '', phone: '' }, flow: null, doctor: null, treatment: null, slot: null });
   }, []);
   const update = useCallback(patch => setState(s => ({ ...s, ...patch })), []);
 
   const handleEdit = target => {
-    if (target === 'calendar') goTo('calendar');
-    else if (target === 'doctor') goTo(state.flow === 'treatment-first' ? 'doctorAfterTreatment' : 'doctor');
-    else if (target === 'treatment') goTo(state.flow === 'doctor-first' || state.doctor ? 'treatmentAfterDoctor' : 'treatment');
+    if (target === 'calendar') { update({ slot: null }); goTo('calendar'); }
+    else if (target === 'doctor') {
+      if (state.flow === 'treatment-first') { update({ doctor: null, slot: null }); goTo('calendar'); }
+      else goTo('doctor');
+    }
+    else if (target === 'treatment') {
+      if (state.flow === 'doctor-first') goTo('treatmentAfterDoctor');
+      else { update({ treatment: null, doctor: null, slot: null }); goTo('treatment'); }
+    }
     else if (target === 'data') goTo('data');
   };
 
-  const STEP_SCREENS = ['data', 'choice', 'calendar', 'confirm'];
-  const handleStepClick = useCallback((stepIdx) => {
-    goTo(STEP_SCREENS[stepIdx]);
-  }, [goTo]);
-
   const screen = state.screen;
-  const stepIndex = PROGRESS_STEP_OF[screen] ?? 0;
+  const steps = getFlowSteps(state.flow);
+  const stepIndex = getFlowStepIndex(screen, state.flow);
   const canBack = state.history.length > 0 && screen !== 'success';
 
   const renderScreen = () => {
     switch (screen) {
-      case 'data': return <DataScreen data={state.data} onChange={data => update({ data })} onContinue={() => goTo('choice')} autoSaving={autoSaving} />;
       case 'choice': return <ChoiceScreen onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
       case 'doctor': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} onSwitch={() => { update({ doctor: null, flow: 'treatment-first' }); goTo('treatment'); }} />;
-      case 'treatment': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first' })} onContinue={() => goTo('doctorAfterTreatment')} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
-      case 'doctorAfterTreatment': return <DoctorPickerScreen selected={state.doctor} onSelect={d => update({ doctor: d })} onContinue={() => goTo('calendar')} treatment={state.treatment} />;
+      case 'treatment': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first', doctor: null })} onContinue={() => goTo('calendar')} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
       case 'treatmentAfterDoctor': return <TreatmentPickerScreen selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => goTo('calendar')} doctor={state.doctor} />;
-      case 'calendar': return <CalendarScreen doctor={state.doctor} treatment={state.treatment} value={state.slot} onSelect={slot => update({ slot })} onContinue={() => goTo('confirm')} />;
+      case 'calendar': return <CalendarScreen
+        doctor={state.doctor}
+        treatment={state.treatment}
+        value={state.slot}
+        onSelect={slot => update({ slot })}
+        onSelectDoctor={state.flow === 'treatment-first' ? d => update({ doctor: d }) : null}
+        onContinue={() => goTo('data')}
+      />;
+      case 'data': return <DataScreen data={state.data} onChange={data => update({ data })} onContinue={() => goTo('confirm')} autoSaving={autoSaving} />;
       case 'confirm': return <ConfirmScreen booking={state} onEdit={handleEdit} onSendSms={() => goTo('sms')} />;
       case 'sms': return <SMSScreen email={state.data.email} onConfirm={() => goTo('success')} onResend={() => {}} onBack={() => goTo('data')} />;
       case 'success': return <SuccessScreen booking={state} onNew={reset} />;
@@ -1428,7 +1478,7 @@ function BookingApp() {
 
   return (
     <div className={'uk-app' + (isDesktop ? ' is-desktop' : '')}>
-      {screen !== 'success' && <ProgressIndicator step={stepIndex} onStepClick={handleStepClick} onBack={goBack} canBack={canBack} />}
+      {screen !== 'success' && <ProgressIndicator steps={steps} stepIndex={stepIndex} onBack={goBack} canBack={canBack} />}
       <div className="uk-body-scroll">
         {renderScreen()}
       </div>
