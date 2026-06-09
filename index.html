@@ -243,69 +243,44 @@
     .uk-tag.muted { background: var(--uk-line-2); color: var(--uk-ink-2); }
     .uk-tag.success { background: var(--uk-success-tint); color: var(--uk-success); }
 
-    /* ── Progress: bar ── */
-    .uk-progress-bar { display: flex; flex-direction: column; gap: 8px; padding: 12px 18px 14px; background: var(--uk-white); border-bottom: 1px solid var(--uk-line); }
-    @media (min-width: 768px) { .uk-progress-bar { padding: 20px max(48px, calc((100% - 1100px) / 2)) 22px; } }
-    .uk-progress-track { height: 4px; background: var(--uk-line); border-radius: var(--r-pill); overflow: hidden; position: relative; }
-    .uk-progress-fill { position: absolute; inset: 0 auto 0 0; background: var(--uk-primary); border-radius: var(--r-pill); transition: width 360ms var(--ease); }
-    /* Mobile: compact step label */
-    .uk-progress-mobile-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .uk-progress-mobile-label .step-count { font-size: 11px; font-weight: 700; color: var(--uk-muted); letter-spacing: .05em; text-transform: uppercase; background: var(--uk-line-2); border-radius: var(--r-pill); padding: 2px 8px; }
-    .uk-progress-mobile-label .step-name { font-size: 13px; font-weight: 600; color: var(--uk-primary); }
-    /* Desktop: all step buttons */
-    .uk-progress-labels { display: none; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 500; }
-    @media (min-width: 768px) {
-      .uk-progress-mobile-label { display: none; }
-      .uk-progress-labels { display: flex; }
-    }
-    .uk-progress-labels button {
-      flex: 1; appearance: none; font-family: inherit; font-size: 12px; font-weight: 500;
-      letter-spacing: -.005em; line-height: 1.3;
-      background: transparent; border: 1px solid transparent; color: var(--uk-muted);
-      padding: 6px 10px; border-radius: var(--r-pill);
-      cursor: default;
-      transition: color 200ms var(--ease), background 200ms var(--ease), border-color 200ms var(--ease);
-    }
-    .uk-progress-labels button.active {
-      color: var(--uk-primary); font-weight: 600;
-      background: var(--uk-primary-tint);
-      border-color: var(--uk-primary-tint-2);
-    }
-    .uk-progress-labels button.done {
-      color: var(--uk-ink-2); cursor: pointer;
-      background: var(--uk-line-2);
-      border-color: var(--uk-line);
-    }
-    .uk-progress-labels button.done:hover {
-      color: var(--uk-primary); background: var(--uk-primary-tint); border-color: var(--uk-primary);
-    }
-    .uk-progress-labels button.done:focus-visible { outline: none; box-shadow: var(--sh-focus); }
+    /* ── Progress stepper ── */
+    .uk-stepper-bar { background: var(--uk-white); border-bottom: 1px solid var(--uk-line); padding: 12px 18px 11px; }
+    @media (min-width: 768px) { .uk-stepper-bar { padding: 20px max(48px, calc((100% - 1100px) / 2)) 22px; } }
 
-    /* ── Progress: dots ── */
-    .uk-progress-dots { display: flex; align-items: flex-start; padding: 18px 18px 14px; background: var(--uk-white); border-bottom: 1px solid var(--uk-line); gap: 0; }
-    @media (min-width: 768px) { .uk-progress-dots { padding: 22px 48px 18px; } }
-    .uk-progress-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; min-width: 0; }
-    .uk-progress-step + .uk-progress-step::before { content: ''; position: absolute; left: -50%; right: 50%; top: 12px; height: 2px; background: var(--uk-line); }
-    .uk-progress-step.done::before,.uk-progress-step.active::before { background: var(--uk-primary); }
-    .uk-progress-dot { width: 26px; height: 26px; border-radius: var(--r-pill); background: var(--uk-white); border: 2px solid var(--uk-line); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--uk-muted); position: relative; z-index: 1; transition: all 200ms var(--ease); }
-    .uk-progress-step.active .uk-progress-dot { background: var(--uk-primary); border-color: var(--uk-primary); color: var(--uk-white); box-shadow: 0 0 0 4px var(--uk-primary-tint); }
-    .uk-progress-step.done .uk-progress-dot { background: var(--uk-primary); border-color: var(--uk-primary); color: var(--uk-white); }
-    .uk-progress-step .uk-progress-step-label { font-size: 11px; color: var(--uk-muted); font-weight: 500; text-align: center; letter-spacing: -.005em; line-height: 1.2; }
-    .uk-progress-step.active .uk-progress-step-label { color: var(--uk-primary); font-weight: 600; }
-    .uk-progress-step.done .uk-progress-step-label { color: var(--uk-ink-2); }
+    /* Mobile: compact track + lépésnév */
+    .uk-stepper-mobile { display: flex; flex-direction: column; gap: 8px; }
+    @media (min-width: 768px) { .uk-stepper-mobile { display: none; } }
+    .uk-stepper-track { height: 4px; background: var(--uk-line); border-radius: var(--r-pill); overflow: hidden; position: relative; }
+    .uk-stepper-fill { position: absolute; inset: 0 auto 0 0; background: var(--uk-primary); border-radius: var(--r-pill); transition: width 360ms var(--ease); }
+    .uk-stepper-mobile-name { font-size: 13px; font-weight: 600; color: var(--uk-primary); }
 
-    /* ── Progress: minimal ── */
-    .uk-progress-min { display: flex; align-items: center; gap: 12px; padding: 10px 18px 12px; background: var(--uk-white); border-bottom: 1px solid var(--uk-line); }
-    @media (min-width: 768px) { .uk-progress-min { padding: 14px 48px; } }
-    .uk-progress-min .label { font-size: 13px; color: var(--uk-ink-2); font-weight: 500; }
-    .uk-progress-min .label strong { color: var(--uk-primary); font-weight: 700; }
-    .uk-progress-min .uk-progress-track { flex: 1; max-width: 200px; height: 3px; }
+    /* Desktop: dot stepper */
+    .uk-stepper-row { display: none; align-items: flex-start; }
+    @media (min-width: 768px) { .uk-stepper-row { display: flex; } }
 
-    /* ── Progress: stepper ── */
-    .uk-progress-stepper { display: flex; gap: 6px; padding: 14px 18px; background: var(--uk-white); border-bottom: 1px solid var(--uk-line); }
-    @media (min-width: 768px) { .uk-progress-stepper { padding: 18px 48px; } }
-    .uk-progress-stepper .seg { flex: 1; height: 6px; border-radius: var(--r-pill); background: var(--uk-line); transition: background 360ms var(--ease); }
-    .uk-progress-stepper .seg.done,.uk-progress-stepper .seg.active { background: var(--uk-primary); }
+    .uk-stepper-conn { flex: 1; height: 2px; background: var(--uk-line); margin-top: 13px; min-width: 16px; transition: background 360ms var(--ease); }
+    .uk-stepper-conn.done { background: var(--uk-primary); }
+
+    .uk-stepper-step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 0 0 auto; }
+
+    .uk-stepper-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid var(--uk-line); background: var(--uk-white);
+      display: flex; align-items: center; justify-content: center;
+      cursor: default; padding: 0; color: var(--uk-white);
+      appearance: none; font-family: inherit;
+      transition: all 200ms var(--ease);
+    }
+    .uk-stepper-step.done .uk-stepper-dot { background: var(--uk-primary); border-color: var(--uk-primary); cursor: pointer; }
+    .uk-stepper-step.done .uk-stepper-dot:hover { filter: brightness(1.12); }
+    .uk-stepper-step.done .uk-stepper-dot:focus-visible { outline: none; box-shadow: var(--sh-focus); }
+    .uk-stepper-step.active .uk-stepper-dot { border-color: var(--uk-primary); box-shadow: 0 0 0 4px var(--uk-primary-tint); }
+
+    .uk-stepper-inner { display: block; width: 10px; height: 10px; border-radius: 50%; background: var(--uk-primary); }
+
+    .uk-stepper-label { font-size: 11px; font-weight: 500; color: var(--uk-muted); white-space: nowrap; }
+    .uk-stepper-step.done .uk-stepper-label { color: var(--uk-ink-2); }
+    .uk-stepper-step.active .uk-stepper-label { color: var(--uk-primary); font-weight: 700; }
 
     /* ── Branch choice ── */
     .uk-branch { display: grid; gap: 12px; }
@@ -517,27 +492,27 @@ const DOCTORS = [
 
 const TREATMENT_GROUPS = [
   { id: 'altalanos', name: 'Általános', items: [
-    { id: 't-vizsgalat',   name: 'Általános fogászati vizsgálat',  duration: 30, price: '15 000 Ft',  specs: ['altalanos', 'gyermek'] },
-    { id: 't-fogko',       name: 'Fogkőeltávolítás',               duration: 45, price: '25 000 Ft',  specs: ['altalanos', 'parodont'] },
-    { id: 't-tomes',       name: 'Esztétikus tömés',               duration: 60, price: '35 000 Ft',  specs: ['altalanos', 'esztetikus'] },
-    { id: 't-konzult',     name: 'Konzultáció',                    duration: 30, price: 'ingyenes',    specs: ['altalanos', 'implant', 'orthodonciai'] },
+    { id: 't-vizsgalat',   name: 'Általános fogászati vizsgálat',  duration: 30, price: '15 000 Ft',       specs: ['altalanos', 'gyermek'] },
+    { id: 't-fogko',       name: 'Fogkőeltávolítás',               duration: 45, price: '25 000 Ft-tól',  specs: ['altalanos', 'parodont'] },
+    { id: 't-tomes',       name: 'Esztétikus tömés',               duration: 60, price: '35 000 Ft-tól',  specs: ['altalanos', 'esztetikus'] },
+    { id: 't-konzult',     name: 'Konzultáció',                    duration: 30, price: 'ingyenes',        specs: ['altalanos', 'implant', 'orthodonciai'] },
   ]},
   { id: 'esztetikai', name: 'Esztétikai kezelések', items: [
-    { id: 't-feheritese',  name: 'Fogfehérítés',                   duration: 90, price: '80 000 Ft',  specs: ['esztetikus'] },
-    { id: 't-hejak',       name: 'Esztétikus héjak',               duration: 75, price: '120 000 Ft', specs: ['esztetikus'] },
-    { id: 't-korona',      name: 'Korona / híd készítés',          duration: 90, price: '150 000 Ft', specs: ['esztetikus', 'protetika'] },
+    { id: 't-feheritese',  name: 'Fogfehérítés',                   duration: 90, price: '80 000 Ft-tól',  specs: ['esztetikus'] },
+    { id: 't-hejak',       name: 'Esztétikus héjak',               duration: 75, price: '120 000 Ft-tól', specs: ['esztetikus'] },
+    { id: 't-korona',      name: 'Korona / híd készítés',          duration: 90, price: '150 000 Ft-tól', specs: ['esztetikus', 'protetika'] },
   ]},
   { id: 'sebeszet', name: 'Sebészet & Implantológia', items: [
-    { id: 't-implant-konz',name: 'Implantátum konzultáció',        duration: 45, price: 'ingyenes',    specs: ['implant'] },
-    { id: 't-implant',     name: 'Implantátum beültetés',          duration: 90, price: '350 000 Ft', specs: ['implant', 'sebeszet'] },
-    { id: 't-foghuzas',    name: 'Foghúzás',                       duration: 45, price: '20 000 Ft',  specs: ['sebeszet', 'altalanos'] },
-    { id: 't-szajsebeszet',name: 'Szájsebészeti beavatkozás',      duration: 60, price: '45 000 Ft',  specs: ['sebeszet'] },
+    { id: 't-implant-konz',name: 'Implantátum konzultáció',        duration: 45, price: 'ingyenes',        specs: ['implant'] },
+    { id: 't-implant',     name: 'Implantátum beültetés',          duration: 90, price: '350 000 Ft-tól', specs: ['implant', 'sebeszet'] },
+    { id: 't-foghuzas',    name: 'Foghúzás',                       duration: 45, price: '20 000 Ft-tól',  specs: ['sebeszet', 'altalanos'] },
+    { id: 't-szajsebeszet',name: 'Szájsebészeti beavatkozás',      duration: 60, price: '45 000 Ft-tól',  specs: ['sebeszet'] },
   ]},
   { id: 'specialis', name: 'Speciális kezelések', items: [
-    { id: 't-gyokerkez',   name: 'Gyökérkezelés',                  duration: 75, price: '55 000 Ft',  specs: ['endodoncia', 'altalanos'] },
-    { id: 't-parodont',    name: 'Parodontológiai kezelés',        duration: 60, price: '40 000 Ft',  specs: ['parodont'] },
-    { id: 't-orthodoncia', name: 'Fogszabályozás konzultáció',     duration: 45, price: 'ingyenes',    specs: ['orthodonciai'] },
-    { id: 't-gyermek',     name: 'Gyermekfogászati vizsgálat',     duration: 30, price: '15 000 Ft',  specs: ['gyermek'] },
+    { id: 't-gyokerkez',   name: 'Gyökérkezelés',                  duration: 75, price: '55 000 Ft-tól',  specs: ['endodoncia', 'altalanos'] },
+    { id: 't-parodont',    name: 'Parodontológiai kezelés',        duration: 60, price: '40 000 Ft-tól',  specs: ['parodont'] },
+    { id: 't-orthodoncia', name: 'Fogszabályozás konzultáció',     duration: 45, price: 'ingyenes',        specs: ['orthodonciai'] },
+    { id: 't-gyermek',     name: 'Gyermekfogászati vizsgálat',     duration: 30, price: '15 000 Ft',       specs: ['gyermek'] },
   ]},
 ];
 
@@ -657,7 +632,7 @@ function getFlowSteps(flow) {
 
 function getFlowStepIndex(screen, flow) {
   if (flow === 'treatment-first') {
-    const m = { choice:0, treatment:1, calendar:2, data:3, confirm:4, sms:4, success:4 };
+    const m = { choice:0, treatment:1, calendar:2, doctorAfterCalendar:2, data:3, confirm:4, sms:4, success:4 };
     return m[screen] ?? 0;
   }
   // doctor-first vagy még nincs flow
@@ -668,26 +643,28 @@ function getFlowStepIndex(screen, flow) {
 function ProgressIndicator({ steps, stepIndex, onStepClick }) {
   const fillPct = ((stepIndex + 1) / steps.length) * 100;
   return (
-    <div className="uk-progress-bar">
-      <div className="uk-progress-track"><div className="uk-progress-fill" style={{ width: fillPct + '%' }} /></div>
-      <div className="uk-progress-mobile-label">
-        <span className="step-name">{steps[stepIndex]}</span>
+    <div className="uk-stepper-bar">
+      <div className="uk-stepper-mobile">
+        <div className="uk-stepper-track"><div className="uk-stepper-fill" style={{ width: fillPct + '%' }} /></div>
+        <span className="uk-stepper-mobile-name">{steps[stepIndex]}</span>
       </div>
-      <div className="uk-progress-labels">
+      <div className="uk-stepper-row">
         {steps.map((label, i) => {
           const isDone = i < stepIndex;
           const isActive = i === stepIndex;
           return (
-            <button
-              key={i}
-              type="button"
-              className={isDone ? 'done' : isActive ? 'active' : ''}
-              disabled={!isDone && !isActive}
-              onClick={isDone && onStepClick ? () => onStepClick(i) : undefined}
-              title={isDone ? `Vissza: ${label}` : undefined}
-            >
-              {label}
-            </button>
+            <React.Fragment key={i}>
+              {i > 0 && <div className={'uk-stepper-conn' + (isDone ? ' done' : '')} />}
+              <div className={'uk-stepper-step' + (isDone ? ' done' : isActive ? ' active' : '')}>
+                <button type="button" className="uk-stepper-dot" disabled={!isDone}
+                  onClick={isDone && onStepClick ? () => onStepClick(i) : undefined}
+                  title={isDone ? `Vissza: ${label}` : undefined}>
+                  {isDone && <Icon.check style={{ width: 12, height: 12 }} />}
+                  {isActive && <span className="uk-stepper-inner" />}
+                </button>
+                <span className="uk-stepper-label">{label}</span>
+              </div>
+            </React.Fragment>
           );
         })}
       </div>
@@ -1459,7 +1436,10 @@ function BookingApp() {
   const handleEdit = target => {
     if (target === 'calendar') { update({ slot: null }); goTo('calendar'); }
     else if (target === 'doctor') {
-      if (state.flow === 'treatment-first') { update({ doctor: null, slot: null }); goTo('calendar'); }
+      if (state.flow === 'treatment-first') {
+        if (isDesktop) { update({ doctor: null, slot: null }); goTo('calendar'); }
+        else { update({ doctor: null }); goTo('doctorAfterCalendar'); }
+      }
       else goTo('doctor');
     }
     else if (target === 'treatment') {
@@ -1478,15 +1458,15 @@ function BookingApp() {
     'doctor-first':    ['choice', 'doctor', 'treatmentAfterDoctor', 'calendar', 'data', 'confirm'],
     'treatment-first': ['choice', 'treatment', 'calendar', 'data', 'confirm'],
   };
-  const handleStepClick = useCallback(i => {
+  const handleStepClick = i => {
     const screens = STEP_SCREENS[state.flow] || STEP_SCREENS['doctor-first'];
     const target = screens[i];
     if (target) goTo(target);
-  }, [state.flow, goTo]);
+  };
 
   const renderScreen = () => {
     switch (screen) {
-      case 'choice': return <ChoiceScreen onBack={canBack ? goBack : null} onPick={w => goTo(w === 'doctor' ? 'doctor' : 'treatment')} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
+      case 'choice': return <ChoiceScreen onBack={canBack ? goBack : null} onPick={w => setState(s => ({ ...s, flow: w === 'doctor' ? 'doctor-first' : 'treatment-first', screen: w === 'doctor' ? 'doctor' : 'treatment', history: [...s.history, s.screen] }))} onQuick={e => setState(s => ({ ...s, doctor: e.doctor, slot: { date: e.date, time: e.time }, screen: 'treatmentAfterDoctor', history: [...s.history, s.screen] }))} />;
       case 'doctor': return <DoctorPickerScreen onBack={goBack} selected={state.doctor} onSelect={d => update({ doctor: d, flow: 'doctor-first' })} onContinue={() => goTo('treatmentAfterDoctor')} onSwitch={() => { update({ doctor: null, flow: 'treatment-first' }); goTo('treatment'); }} />;
       case 'treatment': return <TreatmentPickerScreen onBack={goBack} selected={state.treatment} onSelect={t => update({ treatment: t, flow: 'treatment-first', doctor: null })} onContinue={() => setState(s => ({ ...s, slot: firstSlot(null, s.treatment), screen: 'calendar', history: [...s.history, s.screen] }))} onSwitch={() => { update({ treatment: null, flow: 'doctor-first' }); goTo('doctor'); }} />;
       case 'treatmentAfterDoctor': return <TreatmentPickerScreen onBack={goBack} selected={state.treatment} onSelect={t => update({ treatment: t })} onContinue={() => setState(s => ({ ...s, slot: firstSlot(s.doctor, s.treatment), screen: 'calendar', history: [...s.history, s.screen] }))} doctor={state.doctor} />;
@@ -1496,7 +1476,14 @@ function BookingApp() {
         treatment={state.treatment}
         value={state.slot}
         onSelect={slot => update({ slot })}
-        onSelectDoctor={state.flow === 'treatment-first' ? d => update({ doctor: d }) : null}
+        onSelectDoctor={state.flow === 'treatment-first' && isDesktop ? d => update({ doctor: d }) : null}
+        onContinue={state.flow === 'treatment-first' && !isDesktop ? () => goTo('doctorAfterCalendar') : () => goTo('data')}
+      />;
+      case 'doctorAfterCalendar': return <DoctorPickerScreen
+        onBack={goBack}
+        selected={state.doctor}
+        treatment={state.treatment}
+        onSelect={d => update({ doctor: d })}
         onContinue={() => goTo('data')}
       />;
       case 'data': return <DataScreen onBack={goBack} data={state.data} onChange={data => update({ data })} onContinue={() => goTo('confirm')} autoSaving={autoSaving} />;
